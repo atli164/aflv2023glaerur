@@ -1,0 +1,158 @@
+\documentclass{beamer}
+\usefonttheme[onlymath]{serif}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[english, icelandic]{babel}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsthm}
+\usepackage{gensymb}
+\usepackage{parskip}
+\usepackage{mathtools}
+\usepackage{listings}
+\usepackage{hyperref}
+\usepackage{graphicx}
+\usepackage{color}
+\usepackage{enumerate}
+\usepackage{verbatim}
+\usepackage{minted}
+\parskip 0pt
+
+
+\DeclareMathOperator{\lcm}{lcm}
+\newcommand\floor[1]{\left\lfloor#1\right\rfloor}
+\newcommand\ceil[1]{\left\lceil#1\right\rceil}
+\newcommand\abs[1]{\left|#1\right|}
+\newcommand\p[1]{\left(#1\right)}
+\newcommand\sqp[1]{\left[#1\right]}
+\newcommand\cp[1]{\left\{#1\right\}}
+\newcommand\norm[1]{\left\lVert#1\right\rVert}
+\renewcommand\Im{\operatorname{Im}}
+\renewcommand\Re{\operatorname{Re}}
+
+\usetheme{metropolis}
+\definecolor{dark yellow}{rgb} {0.6,0.6,0.0}
+\definecolor{dark green}{rgb} {0.0,0.6,0.0}
+
+\graphicspath{{myndir/}}
+
+\title{Introduction}
+\author{Arnar Bjarni Arnarson}
+\institute{\href{http://ru.is/td}{School of Computer Science} \\[2pt] \href{http://ru.is}{Reykjavík University}}
+\titlegraphic{\hfill\includegraphics[height=0.6cm]{kattis}}
+\date{\textbf{Árangursrík forritun og lausn verkefna}}
+
+\begin{document}
+
+\begin{frame}[plain]
+    \titlepage
+\end{frame}
+
+\section*{Sliding Window}
+
+\begin{frame}[plain]
+	\frametitle{A Sum Problem}
+	\begin{block}{Problem description}
+    	    Write a program that, given an integer array of size $N$, finds the
+            contiguous subarray of size $K$ with the highest sum.
+    \end{block}
+
+    \vspace{10pt}
+    
+    \begin{block}{Input description}
+            Input consist of two lines.
+            The first line contains two space separated integers $N$, the size of the array, where $1 \leq N \leq 10^6$,
+    and $K$, the size of the subarrays to consider, where $1 \leq K \leq N$.
+            Then second line contains $N$ space separated integers, the values of the array.
+            Each value in the array is between $-10^9$  and $10^9$.
+    \end{block}
+
+    \vspace{10pt}
+    
+    \begin{block}{Output description}
+            Output one line, the sum of the highest valued contiguous subarray of size $K$.
+    \end{block}
+\end{frame}
+
+\begin{frame}[plain]
+	\frametitle{A Sum Problem}
+	\begin{center}
+		\begin{tabular}{|l|l|}
+            \hline
+            {\footnotesize Sample input} & {\footnotesize Sample output} \\
+            \hline
+            \ttfamily
+            10 4 & 39 \\
+            17 20 0 1 5 24 8 2 4 1 &  \\
+            \hline
+        \end{tabular}
+    \end{center}
+\end{frame}
+
+\begin{frame}[plain, fragile]
+    \frametitle{Straightforward Solution}
+	\begin{scriptsize}
+        \begin{minted}{python}
+n, k = map(int, input())
+arr = list(map(int, input()))
+highest = float('inf')
+for start in range(n-k+1):
+    end = start + k
+    total = 0
+    for i in range(start, end):
+        total += arr[i]
+    highest = max((highest, total))
+print(highest)
+        \end{minted}
+    \end{scriptsize}
+    \begin{itemize}
+        \item<2-> This solution constructs all size $K$ contiguous subarrays.
+        \item<3-> What is the time complexity?
+        \item<4-> There are $N$ starting points, each construction takes $K$ steps, so $\mathcal{O}(NK)$.
+        \item<5-> Too slow!
+    \end{itemize}
+\end{frame}
+
+\begin{frame}[plain, fragile]
+    \frametitle{Wasted Operations}
+    \begin{itemize}
+        \item<1-> The subarray starting at index $i$ has the sum $a_i + a_{i+1} + \dots + a_{i+k-1}$.
+        \item<2-> The subarray starting at index $i+1$ has the sum $a_{i+1} + a_{i+2} + \dots + a_{i+k}$.
+        \item<3-> We iterate over the indices $i+1, i+2, \dotsc, i+k-1$ twice.
+        \item<4-> What changes between starting at $i$ vs. starting at $i+1$?
+        \item<5-> We subtract $a_i$.
+        \item<6-> We add $a_i+k$.
+        \item<7-> A shift from the subarray starting at $i$ to the subarray starting at $i+1$ takes $\mathcal{O}(1)$ time then.
+        \item<8-> This is known as the sliding window technique.
+    \end{itemize}
+\end{frame}
+
+\begin{frame}[plain, fragile]
+    \frametitle{Sliding Window Solution}
+	\begin{scriptsize}
+        \begin{minted}{python}
+n, k = map(int, input())
+arr = list(map(int, input()))
+total = 0
+for i in range(k):
+    total += arr[i]
+highest = total
+for i in range(n - k):
+    total -= arr[i]
+    total += arr[i+k]
+    highest = max((highest, total))
+print(highest)
+        \end{minted}
+    \end{scriptsize}
+    \begin{itemize}
+        \item<2-> What is the time complexity?
+        \item<3-> This solution constructs the first size $K$ contiguous subarray.
+        \item<4-> Then, $N-K$ times, an element is removed and another added.
+        \item<5-> Subtracting and adding numbers is constant time so $\mathcal{O}(N)$.
+        \item<6-> Fast enough!
+    \end{itemize}
+\end{frame}
+
+
+\end{document}
+
