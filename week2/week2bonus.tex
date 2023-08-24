@@ -93,9 +93,9 @@
     \frametitle{Straightforward Solution}
 	\begin{scriptsize}
         \begin{minted}{python}
-n, k = map(int, input())
-arr = list(map(int, input()))
-highest = float('inf')
+n, k = map(int, input().split())
+arr = list(map(int, input().split()))
+highest = float('-inf')
 for start in range(n-k+1):
     end = start + k
     total = 0
@@ -131,8 +131,8 @@ print(highest)
     \frametitle{Sliding Window Solution}
 	\begin{scriptsize}
         \begin{minted}{python}
-n, k = map(int, input())
-arr = list(map(int, input()))
+n, k = map(int, input().split())
+arr = list(map(int, input().split()))
 total = 0
 for i in range(k):
     total += arr[i]
@@ -153,6 +153,229 @@ print(highest)
     \end{itemize}
 \end{frame}
 
+\begin{frame}[plain]
+	\frametitle{A Substring Problem}
+	\begin{block}{Problem description}
+    	    Write a program that, give a string of size $N$, finds the
+            longest substring with $K$ distinct elements.
+    \end{block}
+
+    \vspace{10pt}
+    
+    \begin{block}{Input description}
+            Input consist of two lines.
+            The first line contains two space separated integers $N$, the size of the string, where $1 \leq N \leq 10^6$,
+    and $K$, the size of the subarrays to consider, where $1 \leq K \leq 26$.
+            Then second line contains a string of length $N$ consisting of English lowercase characters.
+    \end{block}
+
+    \vspace{10pt}
+    
+    \begin{block}{Output description}
+            Output one line, the longest substring with $K$ distinct elements.
+            If no such string exists, output ``\texttt{DOES NOT EXIST}'', without quotations.
+    \end{block}
+\end{frame}
+
+\begin{frame}[plain]
+	\frametitle{A Substring Problem}
+	\begin{center}
+		\begin{tabular}{|l|l|}
+            \hline
+            {\footnotesize Sample input} & {\footnotesize Sample output} \\
+            \hline
+            \ttfamily
+            14 3 & cdcbcbcb \\
+            bacdcbcbcbabdb & \\
+            \hline
+        \end{tabular}
+    \end{center}
+\end{frame}
+
+\begin{frame}[plain, fragile]
+    \frametitle{General Framework}
+    \begin{scriptsize}
+        \begin{minted}{python}
+from string import ascii_lowercase
+n, k = map(int, input().split())
+s = input()
+
+best_ind, best_len = distinct_k(n, k, s)
+
+if best_len == -1:
+  print("DOES NOT EXIST")
+else:
+  print(s[best_ind:best_ind + best_len])
+        \end{minted}
+    \end{scriptsize}
+\end{frame}
+
+\begin{frame}[plain, fragile]
+    \frametitle{Straightforward Solution}
+	\begin{scriptsize}
+        \begin{minted}{python}
+def distinct_k(n, k, s):
+  best_ind, best_len = -1, -1
+  for start in range(n):
+    for end in range(start, n+1):
+      substring = s[start:end]
+      distinct = 0
+      for symbol in ascii_lowercase:
+        if symbol in substring:
+          distinct += 1
+      cur_len = len(substring)
+      if distinct == k and cur_len > best_len:
+        best_ind = start
+        best_len = cur_len
+  return best_ind, best_len
+        \end{minted}
+    \end{scriptsize}
+    \begin{itemize}.
+        \item<2-> What is the time complexity?
+        \item<3-> There are $\mathcal{O}(N^2)$ substrings of the string
+        \item<4-> Checking each one takes us $\mathcal{O}(N)$ time, so $\mathcal{O}(N^3)$ in total.
+        \item<5-> Way too slow!
+    \end{itemize}
+\end{frame}
+
+\begin{frame}[plain, fragile]
+    \frametitle{Constant optimization}
+	\begin{scriptsize}
+        \begin{minted}{python}
+def distinct_k(n, k, s):
+  best_ind, best_len = -1, -1
+  for start in range(n):
+    for end in range(start, n+1):
+      substring = s[start:end]
+      present = [False for _ in range(26)]
+      for symbol in substring:
+        present[ord(symbol) - ord('a')] = True
+      distinct = sum(present)
+      cur_len = len(substring)
+      if distinct == k and cur_len > best_len:
+        best_ind = start
+        best_len = cur_len
+  return best_ind, best_len
+        \end{minted}
+    \end{scriptsize}
+    \begin{itemize}
+        \item<2-> This is a little faster, by a factor of $26$ approximately.
+        \item<3-> Time complexity is the same.
+        \item<4-> Note that \texttt{counts} barely differs between adjacent values of \texttt{end}
+        \item<5-> Build it as the substring grows.
+    \end{itemize}
+\end{frame}
+
+\begin{frame}[plain, fragile]
+    \frametitle{Incremental}
+	\begin{scriptsize}
+        \begin{minted}{python}
+def distinct_k(n, k, s):
+  best_ind, best_len = -1, -1
+  for start in range(n):
+    present = [False for _ in range(26)]
+    for end in range(start, n):
+      present[ord(s[end]) - ord('a')] = True
+      distinct = sum(present)
+      cur_len = end - start + 1
+      if distinct == k and cur_len > best_len:
+        best_ind = start
+        best_len = cur_len
+  return best_ind, best_len
+        \end{minted}
+    \end{scriptsize}
+    \begin{itemize}
+        \item<2-> Now each substring is processed in constant time.
+        \item<3-> Time complexity is $\mathcal{O}(N^2)$
+        \item<4-> Note that \texttt{counts} barely differs between adjacent values of \texttt{start} for the same value of \texttt{ind}.
+        \item<5-> Also note that once a character stops being distinct, expanding the substring will never make it distinct again.
+        \item<6-> However, removing elements from the front may eventually make characters distinct again.
+    \end{itemize}
+\end{frame}
+
+
+\begin{frame}[plain, fragile]
+    \frametitle{Sliding Window}
+	\begin{scriptsize}
+        \begin{minted}{python}
+def distinct_k(n, k, s):
+  best_ind, best_len = -1, -1
+  start, end, distinct = 0, 0, 0
+  count = [0 for _ in range(26)]
+  while start < n:
+    while end < n:
+      c = ord(s[end]) - ord('a')
+      if distinct == k and count[c] == 0:
+        break
+      count[c] += 1
+      end += 1
+      distinct = sum(x > 0 for x in count)
+    cur_len = end - start
+    if distinct == k and cur_len > best_len:
+      best_ind = start
+      best_len = cur_len
+    count[ord(s[start]) - ord('a')] -= 1
+    start += 1
+    distinct = sum(x > 0 for x in count)
+  return best_ind, best_len
+        \end{minted}
+    \end{scriptsize}
+    \begin{itemize}
+        \item<2-> What is the time complexity?
+        \item<3-> It may seem quadratic at first
+        \item<4-> Each element gets added once, and removed once, so the number of operations is $\mathcal{O}(N)$.
+        \item<6-> Lets introduce $C$, the number of different symbols possible.
+        \item<7-> The time complexity is actually $\mathcal{O}(NC)$, but we can do better!
+    \end{itemize}
+\end{frame}
+
+
+\begin{frame}[plain, fragile]
+    \frametitle{Sliding Window Improved}
+	\begin{scriptsize}
+        \begin{minted}{python}
+def distinct_k(n, k, s):
+  best_ind, best_len = -1, -1
+  start, end, distinct = 0, 0, 0
+  count = [0 for _ in range(26)]
+  while start < n:
+    while end < n:
+      c = ord(s[end]) - ord('a')
+      if distinct == k and count[c] == 0:
+        break
+      if count[c] == 0:
+        distinct += 1
+      count[c] += 1
+      end += 1
+    cur_len = end - start
+    if distinct == k and cur_len > best_len:
+      best_ind = start
+      best_len = cur_len
+    c = ord(s[start]) - ord('a')
+    count[c] -= 1
+    if count[c] == 0:
+      distinct -= 1
+    start += 1
+    distinct = sum(x > 0 for x in count)
+  return best_ind, best_len
+        \end{minted}
+    \end{scriptsize}
+    \begin{itemize}
+        \item<2-> Now adding/removing an element is $\mathcal{O}(1)$.
+        \item<3-> The time complexity is now $\mathcal{O}(N + C)$.
+    \end{itemize}
+\end{frame}
+
+
+\section*{Bitsets}
+
+\section*{Cache Locality}
+
+\section*{Unrolling Loops}
+
+\section*{Branching and Branchless Programming}
+
+\section*{Single Instruction, Multiple Data}
 
 \end{document}
 
