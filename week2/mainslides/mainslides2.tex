@@ -33,7 +33,7 @@
 \usetheme{metropolis}
 \graphicspath{{../../shared/}}
 
-\title{Introduction}
+\title{Complete search and greedy solutions}
 \author{Atli FF}
 \institute{\href{http://ru.is/td}{School of Computer Science} \\[2pt] \href{http://ru.is}{Reykjavík University}}
 \titlegraphic{\hfill\includegraphics[height=0.6cm]{../shared/kattis}}
@@ -67,15 +67,68 @@
 \begin{frame}[plain]
 	\frametitle{Iterating over a variable number of loops}
 	\begin{itemize}
-		 \item Iterating over different solution spaces is key to being able to brute force problems.
+		 \item A common somewhat harder thing is iterating over a sequence of integers, with variable bounds
+		 \item Say we want to test every vector of $n$ integers where each value can be from $0$ to $m - 1$.
+		 \item We could do this usually with $n$ for loops, but if $n$ is an input this does not work
+		 \item In python we can use itertools, C++ needs something handmade
 	\end{itemize}
+\end{frame}
+
+\begin{frame}[plain, fragile]
+	\frametitle{All vectors}
+	\begin{minted}{cpp}
+int n, m; cin >> n >> m;
+vector<int> counter(n, 0);
+while(true) {
+  process_solution(counter); // whatever the problem needs
+  bool done = true;
+  for(int i = 0; i < n; ++i) {
+    counter[i]++;
+    if(counter[i] == m) counter[i] = 0;
+    else {
+      done = false;
+      break;
+    }
+  }
+  if(done) { break; }
+}
+	\end{minted}
 \end{frame}
 
 \begin{frame}[plain]
 	\frametitle{Iterating over subsets}
 	\begin{itemize}
-		 \item Iterating over different solution spaces is key to being able to brute force problems.
+		 \item For subsets we could do the same where we have a \texttt{vector<bool>} and index $i$ denotes whether we include the $i$-th element or not
+		 \item But for this specific case we can do something much faster
+		 \item \texttt{int}s consist of bits, so we can instead just have a number and let the $i$-th bit denote whether we include the $i$-th element or not
+		 \item This means the subsets will just be the numbers from $0$ to $2^n - 1$ for $n$ elements, which can be iterated over with a simple for loop
 	\end{itemize}
+\end{frame}
+
+\begin{frame}[plain]
+	\frametitle{Bit masks}
+	\begin{itemize}
+		 \item These things are usually called bit masks
+		 \item If $A = \{1, 2, 3, 4, 5, 6\}$ and $B = \{1, 3, 5, 6\}$ then the corresponding numbers in binary would be $111111$ and $110101$ since the first bit is the one we write last. In decimal these are 63 and 53.
+		 \item This also gives us a whole load of useful operations that work on masks
+	\end{itemize}
+\end{frame}
+
+\begin{frame}[plain]
+	\frametitle{Bit operations}
+	\begin{tabular}{|l|l|}
+	\hline
+	Code & Meaning \\
+	\hline
+	\texttt{0} & The empty set \\
+	\texttt{(1 <{}< n) - 1} & The set of the first $n$ elements \\
+	\texttt{1 <{}< k} & The set containing only the $k$-th element \\
+	\texttt{A | B} & The union of $A$ and $B$ \\
+	\texttt{A \& B} & The intersection of $A$ and $B$ \\
+	\texttt{A \string^ B} & The symmetric difference of $A$ and $B$ \\
+	\texttt{\string~ A} & The complement of $A$ \\
+	\hline
+	\end{tabular}
 \end{frame}
 
 \begin{frame}[plain, fragile]
@@ -262,6 +315,179 @@ void generate(int x, int y) {
 	\end{minted}
 	\end{scriptsize}
 \end{frame}
+
+
+\begin{frame}[plain]{Greedy algorithms}
+    \begin{itemize}
+        \item An algorithm that always makes \textit{locally} optimal moves is called greedy
+        \item For some kinds of problems this will give a \textit{globally} optimal solution as well
+        \item Seeing when this is the case can be very tricky, and if used in the wrong context the solution will get a WA verdict
+    \end{itemize}
+\end{frame}
+
+\begin{frame}[plain]{Submitting greedy solutions}
+    \begin{itemize}
+        \item The tricky thing with these solutions are that it's often hard to know if you've made a mistake and thus get WA or if there's some hole in the greedy algorithm
+        \item It's often easy to think of all kinds of greedy solutions, but they are very often wrong
+        \item Generally one would like to consider complete search or dynamic programming first, but of course some problems do require greedy solutions
+    \end{itemize}
+\end{frame}
+
+\begin{frame}[plain]{Coin change}
+    \begin{itemize}
+        \item A classical example is making change. Say you want to sum up $n$ and have only denominations of $1, 5$ and $10$, what's the least amount of coins you can give back?
+        \item The greedy solution would be to just always give the biggest coin you can that's not too much. So for say $24$ we'd do $10, 10, 1, 1, 1, 1$.
+        \item Is this always optimal?
+    \end{itemize}
+\end{frame}
+
+\begin{frame}[plain]{Coin change}
+    \begin{itemize}
+        \item Well, it turns out to depend on the denominations. Say we have denominations of $1, 8$ and $20$.
+        \item For $n = 24$ we then give back $20, 1, 1, 1, 1$ instead of the optimal $8, 8, 8$.
+        \item We will come back to this problem tomorrow when we solve the general case using dynamic programming.
+    \end{itemize}
+\end{frame}
+
+\begin{frame}[plain]{Taxi assignment}
+    \begin{itemize}
+        \item Let's consider another problem. You are managing a taxi company and today $n$ drivers showed up and you have $m$ cars. 
+        \item But not all drivers and cars are created equal. Car $i$ has $h_i$ horsepower and driver $j$ can only handle at most $g_j$ horsepower.
+        \item What's the greatest number of drivers you can pair to cars such that they can handle their car?
+    \end{itemize}
+\end{frame}
+
+\begin{frame}[plain]{The greedy step}
+    \begin{itemize}
+        \item The greedy idea here is to simply pair each car to the worst driver that can still handle that car.
+        \item Thus we start by sorting the drives and cars and then simply linearly walk through each and pair them together.
+        \item It might not be obvious, but this actually gives the best answer.
+    \end{itemize}
+\end{frame}
+
+\begin{frame}[plain,fragile]{Implementation}
+\begin{minted}{cpp}
+int main() {
+    int n, m; cin >> n >> m;
+    vi a(n), b(m);
+    for(int i = 0; i < n; ++i) cin >> a[i];
+    for(int i = 0; i < m; ++i) cin >> b[i];
+    sort(a.begin(), a.end());
+    sort(b.begin(), b.end());
+    int ans = 0;
+    for(int i = 0, j = 0; i < m; ++i) {
+        while(j < n && a[j] < b[i]) j++;
+        if(j < n) ans++, j++;
+    }
+    cout << ans << '\n';
+}
+\end{minted}
+\end{frame}
+
+\section*{Greedy algorithms}
+
+\begin{frame}[plain]{Greedy algorithms}
+    \begin{itemize}
+        \item An algorithm that always makes \textit{locally} optimal moves is called greedy
+        \item For some kinds of problems this will give a \textit{globally} optimal solution as well
+        \item Seeing when this is the case can be very tricky, and if used in the wrong context the solution will get a WA verdict
+    \end{itemize}
+\end{frame}
+
+\begin{frame}[plain]{Submitting greedy solutions}
+    \begin{itemize}
+        \item The tricky thing with these solutions are that it's often hard to know if you've made a mistake and thus get WA or if there's some hole in the greedy algorithm
+        \item It's often easy to think of all kinds of greedy solutions, but they are very often wrong
+        \item Generally one would like to consider complete search or dynamic programming first, but of course some problems do require greedy solutions
+    \end{itemize}
+\end{frame}
+
+\begin{frame}[plain]{Coin change}
+    \begin{itemize}
+        \item A classical example is making change. Say you want to sum up $n$ and have only denominations of $1, 5$ and $10$, what's the least amount of coins you can give back?
+        \item The greedy solution would be to just always give the biggest coin you can that's not too much. So for say $24$ we'd do $10, 10, 1, 1, 1, 1$.
+        \item Is this always optimal?
+    \end{itemize}
+\end{frame}
+
+\begin{frame}[plain]{Coin change}
+    \begin{itemize}
+        \item Well, it turns out to depend on the denominations. Say we have denominations of $1, 8$ and $20$.
+        \item For $n = 24$ we then give back $20, 1, 1, 1, 1$ instead of the optimal $8, 8, 8$.
+        \item We will come back to this problem later when we solve the general case using dynamic programming.
+    \end{itemize}
+\end{frame}
+
+\begin{frame}[plain]{Taxi assignment}
+    \begin{itemize}
+        \item Let's consider another problem. You are managing a taxi company and today $n$ drivers showed up and you have $m$ cars. 
+        \item But not all drivers and cars are created equal. Car $i$ has $h_i$ horsepower and driver $j$ can only handle at most $g_j$ horsepower.
+        \item What's the greatest number of drivers you can pair to cars such that they can handle their car?
+    \end{itemize}
+\end{frame}
+
+\begin{frame}[plain]{The greedy step}
+    \begin{itemize}
+        \item The greedy idea here is to simply pair each car to the worst driver that can still handle that car.
+        \item Thus we start by sorting the drives and cars and then simply linearly walk through each and pair them together.
+        \item It might not be obvious, but this actually gives the best answer.
+    \end{itemize}
+\end{frame}
+
+\begin{frame}[plain,fragile]{Implementation}
+\begin{minted}{cpp}
+int main() {
+    int n, m; cin >> n >> m;
+    vi a(n), b(m);
+    for(int i = 0; i < n; ++i) cin >> a[i];
+    for(int i = 0; i < m; ++i) cin >> b[i];
+    sort(a.begin(), a.end());
+    sort(b.begin(), b.end());
+    int ans = 0;
+    for(int i = 0, j = 0; i < m; ++i) {
+        while(j < n && a[j] < b[i]) j++;
+        if(j < n) ans++, j++;
+    }
+    cout << ans << '\n';
+}
+\end{minted}
+\end{frame}
+
+\begin{frame}[plain]{Sorting}
+    \begin{itemize}
+        \item Greedy algorithms very often involve sorting
+        \item More generally they often involve always picking the ``extremal'' option out of the local options, in some sense
+        \item Biggest, shortest, cheapest, first, etc.
+    \end{itemize}
+\end{frame}
+
+\begin{frame}[plain]{Job scheduling}
+    \begin{itemize}
+        \item Say we have a list of jobs, each starting at some time $s_j$ and finishing at some time $f_j$
+        \item What's the largest amount of jobs we can complete if they can't overlap?
+    \end{itemize}
+\end{frame}
+
+\begin{frame}[plain]{Solution}
+    \begin{itemize}
+        \item The solution is shockingly simple, but not obviously correct
+        \item Order the jobs by completion time $f_j$ and then walk through them
+        \item If you can complete a job in addition to the ones you've already picked, pick it
+        \item The jobs you've picked by the end are the solution
+    \end{itemize}
+\end{frame}
+
+\begin{frame}[plain]{Proof of correctness}
+    \begin{itemize}
+        \item Why is this correct though? Let's prove it.
+        \item Suppose the algorithm is not optimal. Say we pick jobs of indices $i_1, i_2, \dots, i_k$ but a better solution picks $j_1, j_2, \dots, j_l$.
+        \item Say the solutions agree on the first $r$ jobs (possibly $0$). 
+        \item Now neither $i_{r+1}$ nor $j_{r+1}$ clash with the jobs $i_1 = j_1, i_2 = j_2, \dots, i_r = j_r$. But because we ordered things by end time, we must have that job $i_{r+1}$ ends no later than $j_{r+1}$. But then we could just as well have picked $i_{r+1}$. But this holds for any $r$, so by induction we have that $i_1, \dots, i_k$ is no worse than $j_1, \dots, j_l$, which gives a contradiction.
+        \item Thus the algorithm is optimal.
+    \end{itemize}
+\end{frame}
+
+\end{document}
 
 \end{document}
 
