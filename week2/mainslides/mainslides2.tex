@@ -1,0 +1,267 @@
+\documentclass{beamer}
+\usefonttheme[onlymath]{serif}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[english]{babel}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsthm}
+\usepackage{gensymb}
+\usepackage{parskip}
+\usepackage{mathtools}
+\usepackage{listings}
+\usepackage{hyperref}
+\usepackage{graphicx}
+\usepackage{color}
+\usepackage{enumerate}
+\usepackage{verbatim}
+\usepackage{minted}
+\parskip 0pt
+
+
+\DeclareMathOperator{\lcm}{lcm}
+\newcommand\floor[1]{\left\lfloor#1\right\rfloor}
+\newcommand\ceil[1]{\left\lceil#1\right\rceil}
+\newcommand\abs[1]{\left|#1\right|}
+\newcommand\p[1]{\left(#1\right)}
+\newcommand\sqp[1]{\left[#1\right]}
+\newcommand\cp[1]{\left\{#1\right\}}
+\newcommand\norm[1]{\left\lVert#1\right\rVert}
+\renewcommand\Im{\operatorname{Im}}
+\renewcommand\Re{\operatorname{Re}}
+
+\usetheme{metropolis}
+\graphicspath{{../../shared/}}
+
+\title{Introduction}
+\author{Atli FF}
+\institute{\href{http://ru.is/td}{School of Computer Science} \\[2pt] \href{http://ru.is}{Reykjavík University}}
+\titlegraphic{\hfill\includegraphics[height=0.6cm]{../shared/kattis}}
+\date{\textbf{Árangursrík forritun og lausn verkefna}}
+
+\begin{document}
+
+\begin{frame}[plain]
+    \titlepage
+\end{frame}
+
+\section*{Complete search / Brute force}
+
+\begin{frame}[plain]
+	\frametitle{Solution space}
+	\begin{itemize}
+		 \item The set of all possible solutions to a problem is called the \textit{solution space}
+		 \item Note that this solution space will then contain all the wrong solutions too
+		 \item Iterating over the entire solution space is called a complete search or brute force solution
+	\end{itemize}
+\end{frame}
+
+\begin{frame}[plain]
+	\frametitle{Iterating over solution spaces}
+	\begin{itemize}
+		 \item Iterating over different solution spaces is key to being able to brute force problems.
+		 \item For the simplest cases, like ones you may have seen already in problems, we can just nest for/while loops.
+	\end{itemize}
+\end{frame}
+
+\begin{frame}[plain]
+	\frametitle{Iterating over a variable number of loops}
+	\begin{itemize}
+		 \item Iterating over different solution spaces is key to being able to brute force problems.
+	\end{itemize}
+\end{frame}
+
+\begin{frame}[plain]
+	\frametitle{Iterating over subsets}
+	\begin{itemize}
+		 \item Iterating over different solution spaces is key to being able to brute force problems.
+	\end{itemize}
+\end{frame}
+
+\begin{frame}[plain, fragile]
+	\frametitle{Iterating over permutations}
+	\begin{itemize}
+		 \item Say we want to iterate over all permutations of some vector/list.
+		 \item Luckily this is built into a lot of languages:
+		 \begin{itemize}
+		 	\item \texttt{next\_permutation(v.begin(), v.end())} in C++
+		 	\item \texttt{itertools.permutations} in Python
+		 \end{itemize}
+	\end{itemize}
+	\begin{minted}{cpp}
+int n = 5; vector<int> perm(n);
+for(int i = 0; i < n; ++i) perm[i] = i + 1;
+do {
+	for(int i = 0; i < n; ++i) cout << perm[i] << ' ';
+	cout << '\n';
+} while(next_permutation(perm.begin(), perm.end()));
+\end{minted}
+\end{frame}
+
+\begin{frame}[plain]
+	\frametitle{Backtracking}
+	\begin{itemize}
+		 \item The methods to iterate over permutations and subsets were rather specialized
+		 \item Backtracking is a general framework to iterate over complex spaces
+		 \item Solves many classic problems like n-queens and sudoku
+	\end{itemize}
+\end{frame}
+
+\begin{frame}[plain]
+	\frametitle{Backtracking}
+	\begin{itemize}
+		 \item Define some initial "empty" state and have some notion of partial or complete states
+		 \item For example in sudoku this is an empty grid, a partially filled grid and a fully numbered grid
+		 \item Then define transitions to further states
+		 \item In sudoku this would be filling in a number such that it doesn't create an immediate contradiction
+	\end{itemize}
+\end{frame}
+
+\begin{frame}[plain]
+	\frametitle{Backtracking}
+	\begin{itemize}
+		 \item Now start with your empty state
+		 \item Use recursion to traverse all states by using the transitions
+		 \item If the current state is invalid, stop exploring this branch
+		 \item Process all complete states
+	\end{itemize}
+\end{frame}
+
+\begin{frame}[plain, fragile]
+	\frametitle{Backtracking - pseudo code}
+	\begin{small}
+	\begin{minted}{cpp}
+state S;
+
+void generate() {
+	if(!is_valid(S)) return;
+	
+	if(is_complete(S)) print(S);
+	
+	for(each state P that S can transition to) {
+		apply transition to P;
+		generate();
+		undo transition to P;
+	}
+}
+
+S = empty state;
+generate();
+	\end{minted}
+	\end{small}
+\end{frame}
+
+\begin{frame}[plain, fragile]
+	\frametitle{Backtracking - Subsets}
+	\begin{itemize}
+		 \item We can even repluicate earlier functionality this way
+	\end{itemize}
+	\begin{small}
+	\begin{minted}{cpp}
+const int n = 5; bool pick[n];
+
+void generate(int index) {
+  if(index == n) {
+    for(int i = 0; i < n; ++i)
+      if(pick[i]) cout << i << ' ';
+    cout << '\n';
+  } else {
+    pick[index] = true;
+    generate(index + 1); // pick element at index
+    pick[index] = false;
+    generate(index + 1); // don't pick element at index
+  }
+}
+generate(0);
+	\end{minted}
+	\end{small}
+\end{frame}
+
+\begin{frame}[plain, fragile]
+	\frametitle{Backtracking - Permutations}
+	\begin{small}
+	\begin{minted}{cpp}
+const int n = 5; int perm[n]; bool used[n];
+
+void generate(int index) {
+  if(index == n) {
+    for(int i = 0; i < n; ++i)
+      cout << perm[i] + 1 << ' ';
+    cout << '\n';
+  } else {
+    // decide what the element at index should be
+    for(int i = 0; i < n; ++i) {
+      if(!used[i]) {
+        used[i] = true;
+        perm[index] = i;
+        generate(at + 1);
+        used[i] = false; // remember to undo move!
+      } } } }
+memset(used, 0, n); generate(0);
+	\end{minted}
+	\end{small}
+\end{frame}
+
+\begin{frame}[plain]
+	\frametitle{Backtracking - N queens}
+	\begin{itemize}
+		 \item Another classic backtracking problem is n-queens
+		 \item We have a $n \times n$ chessboard and want to place $n$ queens on it so no two of them can attack each other
+		 \item We could use bit tricks to iterate over all subsets of $n$ pieces in the board, but that would be too slow
+		 \item Backtracking is much faster since we prune branches of computation early, it's almost universally good to do extra work earlier to prune branches when backtracking
+	\end{itemize}
+\end{frame}
+
+\begin{frame}[plain, fragile]
+	\frametitle{Backtracking - N queens}
+	\begin{itemize}
+		 \item We go through the cells in order
+		 \item Our transition is placing a queen, or not placing a queen
+		 \item We don't place a queen if it would be able to attack another placed queen
+	\end{itemize}
+	\begin{small}
+	\begin{minted}{cpp}
+const int n = 8;
+bool has_queen[n][n];
+int threatened[n][n];
+int queens_left = n;
+
+// generate function
+
+memset(has_queen, 0, sizeof(has_queen));
+memset(threatened, 0, sizeof(threatened));
+generate(0, 0);
+	\end{minted}
+	\end{small}
+\end{frame}
+
+\begin{frame}[plain, fragile]
+	\frametitle{Backtracking - N queens}
+	\begin{scriptsize}
+	\begin{minted}{cpp}
+void generate(int x, int y) {
+  if(y == n) generate(x + 1, 0); // move onto next column
+  else if(x== n) { // we are at the end
+    if(queens_left == 0) // this is a valid solution
+      print(); // exact implementation not important
+   } else {
+     if(queens_left > 0 && threatened[x][y] == 0) {
+       has_queen[x][y] = true;
+       for(auto p : queen_threaten(x, y)) // good exercise to implement this!
+         threatened[p.first][p.second]++; 
+       queens_left--;
+       generate(x, y + 1);
+       has_queen[x][y] = false;  // now to undo the move
+       for(auto p : queen_threaten(x, y))
+         threatened[p.first][p.second]--; 
+       queens_left++;
+     }
+     generate(x, y + 1); // also have to try leaving it empty
+   }
+}
+	\end{minted}
+	\end{scriptsize}
+\end{frame}
+
+\end{document}
+
