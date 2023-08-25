@@ -212,7 +212,7 @@ else:
 
 \begin{frame}[plain, fragile]
     \frametitle{Straightforward Solution}
-	\begin{scriptsize}
+	\begin{tiny}
         \begin{minted}{python}
 def distinct_k(n, k, s):
   best_ind, best_len = -1, -1
@@ -229,7 +229,7 @@ def distinct_k(n, k, s):
         best_len = cur_len
   return best_ind, best_len
         \end{minted}
-    \end{scriptsize}
+    \end{tiny}
     \begin{itemize}
         \item<2-> What is the time complexity?
         \item<3-> There are $\mathcal{O}(N^2)$ substrings of the string
@@ -240,7 +240,7 @@ def distinct_k(n, k, s):
 
 \begin{frame}[plain, fragile]
     \frametitle{Constant optimization}
-	\begin{scriptsize}
+	\begin{tiny}
         \begin{minted}{python}
 def distinct_k(n, k, s):
   best_ind, best_len = -1, -1
@@ -257,7 +257,7 @@ def distinct_k(n, k, s):
         best_len = cur_len
   return best_ind, best_len
         \end{minted}
-    \end{scriptsize}
+    \end{tiny}
     \begin{itemize}
         \item<2-> This is a little faster, by a factor of $26$ approximately.
         \item<3-> Time complexity is the same.
@@ -268,7 +268,7 @@ def distinct_k(n, k, s):
 
 \begin{frame}[plain, fragile]
     \frametitle{Incremental}
-	\begin{scriptsize}
+	\begin{tiny}
         \begin{minted}{python}
 def distinct_k(n, k, s):
   best_ind, best_len = -1, -1
@@ -283,7 +283,7 @@ def distinct_k(n, k, s):
         best_len = cur_len
   return best_ind, best_len
         \end{minted}
-    \end{scriptsize}
+    \end{tiny}
     \begin{itemize}
         \item<2-> Now each substring is processed in constant time.
         \item<3-> Time complexity is $\mathcal{O}(N^2)$
