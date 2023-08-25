@@ -1,4 +1,4 @@
-\documentclass{beamer}
+\documentclass[10pt]{beamer}
 \usefonttheme[onlymath]{serif}
 \usepackage[T1]{fontenc}
 \usepackage[utf8]{inputenc}
@@ -323,7 +323,7 @@ def distinct_k(n, k, s):
     \begin{itemize}
         \item<2-> What is the time complexity?
         \item<3-> It may seem quadratic at first
-        \item<4-> Each element gets added once, and removed once, so the number of operations is $\mathcal{O}(N)$.
+        \item<4-> Each element gets added and removed once, so $\mathcal{O}(N)$.
         \item<6-> Lets introduce $C$, the number of different symbols possible.
         \item<7-> The time complexity is actually $\mathcal{O}(NC)$, but we can do better!
     \end{itemize}
