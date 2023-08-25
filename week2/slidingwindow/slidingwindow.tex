@@ -121,9 +121,9 @@ print(highest)
         \item<3-> We iterate over the indices $i+1, i+2, \dotsc, i+k-1$ twice.
         \item<4-> What changes between starting at $i$ vs. starting at $i+1$?
         \item<5-> We subtract $a_i$.
-        \item<6-> We add $a_i+k$.
-        \item<7-> A shift from the subarray starting at $i$ to the subarray starting at $i+1$ takes $\mathcal{O}(1)$ time then.
-        \item<8-> This is known as the sliding window technique.
+        \item<6-> We add $a_{i+k}$.
+        \item<7-> A shift from the subarray starting at $i$ to the subarray starting at $i+1$ takes $\mathcal{O}(1)$ time.
+        \item<8-> This is known as the sliding window technique, in this case with a fixed window size.
     \end{itemize}
 \end{frame}
 
@@ -165,7 +165,7 @@ print(highest)
     \begin{block}{Input description}
             Input consist of two lines.
             The first line contains two space separated integers $N$, the size of the string, where $1 \leq N \leq 10^6$,
-    and $K$, the size of the subarrays to consider, where $1 \leq K \leq 26$.
+    and $K$, the number of distinct elements the substring must have, where $1 \leq K \leq 26$.
             Then second line contains a string of length $N$ consisting of English lowercase characters.
     \end{block}
 
@@ -287,16 +287,16 @@ def distinct_k(n, k, s):
     \begin{itemize}
         \item<2-> Now each substring is processed in constant time.
         \item<3-> Time complexity is $\mathcal{O}(N^2)$
-        \item<4-> Note that \texttt{counts} barely differs between adjacent values of \texttt{start} for the same value of \texttt{ind}.
-        \item<5-> Also note that once a character stops being distinct, expanding the substring will never make it distinct again.
-        \item<6-> However, removing elements from the front may eventually make characters distinct again.
+        \item<4-> For a given value of \texttt{ind}, adjacent \texttt{start} values have similar values of \texttt{counts}.
+        \item<5-> Note that adding characters will never decrease \texttt{distinct}.
+        \item<6-> However, removing elements from the front may reduce \texttt{distinct}.
     \end{itemize}
 \end{frame}
 
 
 \begin{frame}[plain, fragile]
     \frametitle{Sliding Window}
-	\begin{scriptsize}
+	\begin{tiny}
         \begin{minted}{python}
 def distinct_k(n, k, s):
   best_ind, best_len = -1, -1
@@ -319,7 +319,7 @@ def distinct_k(n, k, s):
     distinct = sum(x > 0 for x in count)
   return best_ind, best_len
         \end{minted}
-    \end{scriptsize}
+    \end{tiny}
     \begin{itemize}
         \item<2-> What is the time complexity?
         \item<3-> It may seem quadratic at first
@@ -332,7 +332,7 @@ def distinct_k(n, k, s):
 
 \begin{frame}[plain, fragile]
     \frametitle{Sliding Window Improved}
-	\begin{scriptsize}
+	\begin{tiny}
         \begin{minted}{python}
 def distinct_k(n, k, s):
   best_ind, best_len = -1, -1
@@ -359,7 +359,7 @@ def distinct_k(n, k, s):
     distinct = sum(x > 0 for x in count)
   return best_ind, best_len
         \end{minted}
-    \end{scriptsize}
+    \end{tiny}
     \begin{itemize}
         \item<2-> Now adding/removing an element is $\mathcal{O}(1)$.
         \item<3-> The time complexity is now $\mathcal{O}(N + C)$.
@@ -379,12 +379,12 @@ def distinct_k(n, k, s):
     \frametitle{General Method}
     \begin{itemize}
         \item<1->  Suppose that your current window is $[i, j)$ which are both initialized as $0$.
-        \item<2->  Define an operation \texttt{add} which adds $j$ to your subarray, finally increasing $j$ by $1$.
-        \item<3->  Define an operation \texttt{remove} which removes $i$ from your subarray, finally increasing $i$ by $1$.
+        \item<2->  Define an operation \texttt{add} which adds $a_j$ to your subarray, finally increasing $j$ by $1$.
+        \item<3->  Define an operation \texttt{remove} which removes $a_i$ from your subarray, finally increasing $i$ by $1$.
         \item<4->  Step 1: If performing \texttt{add} does not break your condition, perform it and repeat step 1. Otherwise go to step 2.
         \item<5->  Step 2: Check if the current window is a better answer and possibly update. Then go to step 3.
         \item<6->  Step 3: Perform \texttt{remove} and go to step 1.
-        \item<7-> Time complexity is $\mathcal{O}(N \cdot (X + Y))$ where $X$ and $Y$ are the cost of \texttt{add} and \texttt{remove} respectively.
+        \item<7-> Time complexity is $\mathcal{O}(N \cdot (X + Y))$ where $X$ and $Y$ are the cost of \texttt{add} and \texttt{remove}, respectively.
     \end{itemize}
 \end{frame}
 \end{document}
