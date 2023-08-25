@@ -15,7 +15,7 @@
 \usepackage{color}
 \usepackage{enumerate}
 \usepackage{verbatim}
-\usepackage{minted}
+\usepackage[cache=false]{minted}
 \parskip 0pt
 
 
@@ -39,7 +39,7 @@
 \title{Introduction}
 \author{Arnar Bjarni Arnarson}
 \institute{\href{http://ru.is/td}{School of Computer Science} \\[2pt] \href{http://ru.is}{Reykjavík University}}
-\titlegraphic{\hfill\includegraphics[height=0.6cm]{kattis}}
+\titlegraphic{\hfill\includegraphics[height=0.6cm]{../../shared/kattis}}
 \date{\textbf{Árangursrík forritun og lausn verkefna}}
 
 \begin{document}
@@ -230,7 +230,7 @@ def distinct_k(n, k, s):
   return best_ind, best_len
         \end{minted}
     \end{scriptsize}
-    \begin{itemize}.
+    \begin{itemize}
         \item<2-> What is the time complexity?
         \item<3-> There are $\mathcal{O}(N^2)$ substrings of the string
         \item<4-> Checking each one takes us $\mathcal{O}(N)$ time, so $\mathcal{O}(N^3)$ in total.
@@ -366,16 +366,26 @@ def distinct_k(n, k, s):
     \end{itemize}
 \end{frame}
 
+\begin{frame}
+    \frametitle{General Method}
+    \begin{itemize}
+        \item<1->  This method is applicable when working with substrings or subarrays.
+        \item<2->  The data has to be contiguous, or in other words, no gaps between selected elements.
+        \item<3->  Usually you want the maximal or the minimal window fulfilling a certain condition.
+    \end{itemize}
+\end{frame}
 
-\section*{Bitsets}
-
-\section*{Cache Locality}
-
-\section*{Unrolling Loops}
-
-\section*{Branching and Branchless Programming}
-
-\section*{Single Instruction, Multiple Data}
-
+\begin{frame}
+    \frametitle{General Method}
+    \begin{itemize}
+        \item<1->  Suppose that your current window is $[i, j)$ which are both initialized as $0$.
+        \item<2->  Define an operation \texttt{add} which adds $j$ to your subarray, finally increasing $j$ by $1$.
+        \item<3->  Define an operation \texttt{remove} which removes $i$ from your subarray, finally increasing $i$ by $1$.
+        \item<4->  Step 1: If performing \texttt{add} does not break your condition, perform it and repeat step 1. Otherwise go to step 2.
+        \item<5->  Step 2: Check if the current window is a better answer and possibly update. Then go to step 3.
+        \item<6->  Step 3: Perform \texttt{remove} and go to step 1.
+        \item<7-> Time complexity is $\mathcal{O}(N \cdot (X + Y))$ where $X$ and $Y$ are the cost of \texttt{add} and \texttt{remove} respectively.
+    \end{itemize}
+\end{frame}
 \end{document}
 
