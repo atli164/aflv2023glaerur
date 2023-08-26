@@ -1,0 +1,261 @@
+\documentclass{beamer}
+\usefonttheme[onlymath]{serif}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[english, icelandic]{babel}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsthm}
+\usepackage{gensymb}
+\usepackage{parskip}
+\usepackage{mathtools}
+\usepackage{listings}
+\usepackage{hyperref}
+\usepackage{graphicx}
+\usepackage{color}
+\usepackage{enumerate}
+\usepackage{verbatim}
+\usepackage{minted}
+\parskip 0pt
+
+
+\DeclareMathOperator{\lcm}{lcm}
+\newcommand\floor[1]{\left\lfloor#1\right\rfloor}
+\newcommand\ceil[1]{\left\lceil#1\right\rceil}
+\newcommand\abs[1]{\left|#1\right|}
+\newcommand\p[1]{\left(#1\right)}
+\newcommand\sqp[1]{\left[#1\right]}
+\newcommand\cp[1]{\left\{#1\right\}}
+\newcommand\norm[1]{\left\lVert#1\right\rVert}
+\renewcommand\Im{\operatorname{Im}}
+\renewcommand\Re{\operatorname{Re}}
+
+\usetheme{metropolis}
+\definecolor{dark yellow}{rgb} {0.6,0.6,0.0}
+\definecolor{dark green}{rgb} {0.0,0.6,0.0}
+
+\graphicspath{{myndir/}}
+
+\title{Constant Optimizations}
+\author{Arnar Bjarni Arnarson}
+\institute{\href{http://ru.is/td}{School of Computer Science} \\[2pt] \href{http://ru.is}{Reykjavík University}}
+\titlegraphic{\hfill\includegraphics[height=0.6cm]{../../shared/kattis}}
+\date{\textbf{Árangursrík forritun og lausn verkefna}}
+
+\begin{document}
+
+\begin{frame}[plain]
+    \titlepage
+\end{frame}
+
+\section*{Faster I/O}
+
+\begin{frame}[plain, fragile]
+    Sometimes the slowest part of your program is reading input and writing output.
+    We can limit the impact I/O has on our program by:
+    \begin{itemize}
+        \item<2-> C++: using \texttt{ios\_base::sync\_with\_stdio(false);} at the start of your program
+        \item<3-> C++: reducing flush operations, use \texttt{'\textbackslash n'} instead of \texttt{endl}
+        \item<4-> C++: using a custom built function to read integers: \href{https://github.com/SuprDewd/CompetitiveProgramming/blob/master/code/tricks/fast_input.cpp}{LINK}
+        \item<5-> Python: use \texttt{sys.stdin} and \texttt{sys.stdout}, only flush when needed. Note that \texttt{print} and \texttt{input} may flush your output, possibly slowing your program unnecessarily.
+        \item<6-> Java/C\#: I don't know how to make it fast, if I/O is a bottleneck, use a different language maybe? Kattio.java exists but isn't particularly fast compared to C++.
+    \end{itemize}
+\end{frame}
+
+\section*{Locality of Reference}
+
+\begin{frame}[plain]
+    \frametitle{Locality of Reference}
+    \begin{itemize}
+        \item Some of the optimizations discussed beyond this point may or may not be done by the compiler depending on the code you write.
+        \item<2-> The compiler is good at optimizing common patterns, but needs a little guidance sometimes.
+        \item<3-> We will be examining a bit how data and instructions are processed by a CPU.
+        \item<4-> The CPU executes instructions, which it needs to access, on data, which it also needs to access.
+        \item<5-> Modern CPUs tend to separate these two and treat them differently.
+        \item<6-> Recently referenced, or used, data and instructions tend to be reused.
+        \item<7-> Temporal locality: A recently accessed (memory) address is likely to be accessed in the near future.
+        \item<8-> Spatial locality: An address nearby a recently accessed address likely to be accessed in the near future.
+    \end{itemize}
+\end{frame}
+
+\begin{frame}[plain,fragile]
+    \frametitle{Spotting Locality}
+    \begin{scriptsize}
+        \begin{minted}{cpp}
+int sum(int arr[N]) {
+    int result = 0;
+    for (int i = 0; i < N; i++) {
+        result += a[i];
+    }
+    return result;
+}
+        \end{minted}
+    \end{scriptsize}
+    \begin{itemize}
+        \item<2-> Here \texttt{result} is referenced in each iteration: temporal locality of data
+        \item<3-> Here the same instructions are used in each iteration of a short loop: temporal locality of instructions
+        \item<4-> Here array elements are accessed in increasing order with no gaps: spatial locality of data
+        \item<5-> Here instructions are processed sequentially: spatial locality of instructions
+    \end{itemize}
+\end{frame}
+
+\begin{frame}[plain,fragile]
+    \frametitle{Summing by columns}
+    \begin{scriptsize}
+        \begin{minted}{cpp}
+int sum_by_col(int arr[N][M]){
+    int result = 0;
+    for (int j = 0; j < M; j++) {
+        for (int i = 0; i < N; i++) {
+            result += a[i][j];
+        }
+    }
+    return result;
+}
+        \end{minted}
+    \end{scriptsize}
+    \begin{itemize}
+        \item<2-> In the inner loop we are jumping between memory addresses in steps of size $M$.
+        \item<3-> The CPU cache will not be utilized that well, unless it is large enough to store the whole array.
+        \item<4-> Swapping the order of our loops makes use of spatial locality.
+        \item<5-> That way the CPU cache will be utilized better.
+    \end{itemize}
+\end{frame}
+
+\begin{frame}[plain,fragile]
+    \frametitle{Summing by rows}
+    \begin{scriptsize}
+        \begin{minted}{cpp}
+int sum_by_row(int arr[N][M]){
+    int result = 0;
+    for (int i = 0; i < N; i++) {
+        for (int j = 0; j < M; i++) {
+            result += a[i][j];
+        }
+    }
+    return result;
+}
+        \end{minted}
+    \end{scriptsize}
+    \begin{itemize}
+        \item<2-> Now the inner loop jumps between addresses in steps of size $1$.
+        \item<3-> So how much of a difference does this make?
+        \item<4-> I tested with my \href{https://www.intel.com/content/www/us/en/products/sku/75048/intel-core-i54670k-processor-6m-cache-up-to-3-80-ghz/specifications.html}{Intel\textregistered Core\texttrademark i5-4670K}
+        \item<5-> Setting $N = M = 10\,000$ to get a sufficiently large array, so $10^8$ additions will be performed by each function.
+        \item<6-> The function \texttt{sum\_by\_col} takes approximately $1.025$ seconds on average.
+        \item<7-> The function \texttt{sum\_by\_row} takes approximately $0.041$ seconds on average.
+        \item<8-> A factor of $25$, so not negligible at all! Note that L2 caches generally perform about $25$ times faster than RAM.
+    \end{itemize}
+\end{frame}
+
+\begin{frame}[plain]
+	\frametitle{A Scheduling Problem - From Errichto on CF}
+	\begin{block}{Problem description}
+        There are $N$ workers, where $1 \leq N \leq 5\,000$.
+        Each worker is either available or unavailable each day.
+        There is a $30$ day window for a two man group project.
+        The project can only be worked on if both group members are available.
+        You may assume all workers are equally competent, so you only want to maximize the number of days they work together.
+        What is the best pair of workers to select?
+    \end{block}
+\end{frame}
+
+\begin{frame}[plain,fragile]
+	\frametitle{A Scheduling Problem - Slow Solution}
+    \begin{minted}{cpp}
+vector<vector<int>> workers;
+int intersection(int a, int b) {
+    int i = 0, j = 0;
+    int result = 0;
+    while (i < N && j < N) {
+        if (workers[a][i] == workers[b][j]) {
+            result++, i++, j++;
+        }
+        else if (workers[a][i] < workers[b][j]) {
+            i++;
+        }
+        else {
+            j++;
+        }
+    }
+    return result;
+}
+    \end{minted}
+    \begin{itemize}
+        \item<2-> We can determine the best pair using this function and iterating through all pairs.
+        \item<3-> The time complexity is $\mathcal{O}(N^2D)$, in our case $D=30$.
+        \item<4-> Too slow.
+    \end{itemize}
+\end{frame}
+
+\begin{frame}[plain,fragile]
+	\frametitle{A Scheduling Problem - Less Slow Solution}
+    \begin{minted}{cpp}
+vector<int> workers;
+int intersection(int a, int b) {
+    int result = 0;
+    int inter = workers[a] & workers[b];
+    for (int i = 0; i < D; i++) {
+        if (inter & 1) {
+            result++;
+        }
+        inter >>= 1;
+    }
+    return result;
+}
+    \end{minted}
+    \begin{itemize}
+        \item Lets store the availability as bitmasks.
+        \item<2-> This allows us to pack our data more efficiently, which will improve our cache usage.
+        \item<3-> Probably still too slow.
+        \item<4-> The loop still takes $D = 30$ steps, but we can do it faster.
+    \end{itemize}
+\end{frame}
+
+\begin{frame}[plain,fragile]
+	\frametitle{A Scheduling Problem - Magic Solution}
+    \begin{minted}{cpp}
+vector<int> workers;
+int intersection(int a, int b) {
+    return __builtin_popcount(workers[a] & workers[b]);
+}
+    \end{minted}
+    \begin{itemize}
+        \item What sorcery is this?
+        \item<2-> Popcount is the number of set bits, or ones, in the binary representation of the number.
+        \item<3-> It's time complexity is $\mathcal{O}(1)$ and most CPUs have it as a single instruction.
+        \item<4-> Now our time complexity is $\mathcal{O}(N^2)$ and the code runs fast enough.
+        \item<4-> But wait, there is more!
+    \end{itemize}
+\end{frame}
+
+\begin{frame}[plain]
+    \frametitle{More Magic}
+    \begin{itemize}
+        \item<1-> We have \texttt{\_\_builtin\_ctz}, which counts trailing zeros.
+        \item<2-> We have \texttt{\_\_builtin\_clz}, which counts leading zeros.
+        \item<3-> We have \texttt{\_\_builtin\_parity}, which returns 1 if odd number of bits are set.
+        \item<4-> We have \texttt{\_\_builtin\_ffs}, which finds the index of the first set bit.
+        \item<5-> For \texttt{long long} add the suffix \texttt{ll}.
+        \item<6-> What if $D = 60$? We could use 64-bit integers.
+        \item<7-> What if $D > 64$?
+    \end{itemize}
+\end{frame}
+
+\section*{The Infamous Bitset}
+
+\begin{frame}
+    \frametitle{The Infamous Bitset}
+    \begin{itemize}
+        \item 
+    \end{itemize}
+\end{frame}
+
+\section*{Unrolling Loops}
+
+\section*{Branching and Branchless Programming}
+
+\section*{Single Instruction, Multiple Data}
+
+\end{document}
+
