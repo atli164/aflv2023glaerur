@@ -1,4 +1,4 @@
-\documentclass{beamer}
+\documentclass[11pt]{beamer}
 \usefonttheme[onlymath]{serif}
 \usepackage[T1]{fontenc}
 \usepackage[utf8]{inputenc}
@@ -48,33 +48,54 @@
     \titlepage
 \end{frame}
 
-\section*{Faster I/O}
+\section*{What Are Constant Optimizations?}
+\begin{frame}[plain]
+    \frametitle{What Are Constant Optimizations?}
+    \begin{itemize}
+        \item The majority of the course focuses on algorithmic optimizations where time complexity is improved.
+        \item<2-> But time complexity does not tell the whole story since constants are ignored.
+        \item<3-> Some complex algorithms have great time complexity but an awful constant factor.
+        \item<4-> Others have ``brute force'' like complexity but with a good constant factor, less than $1$ even.
+        \item<5-> For example, searching for palindromic numbers can be done by iterating through integers in ascending order.
+        \item<6-> Noticing that all palindromic integers are divisible by $11$ allows for a constant optimization, where the time complexity remains the same.
+    \end{itemize}
+\end{frame}
 
+\section*{Faster I/O}
 \begin{frame}[plain, fragile]
+    \frametitle{Faster I/O}
     Sometimes the slowest part of your program is reading input and writing output.
     We can limit the impact I/O has on our program by:
     \begin{itemize}
-        \item<2-> C++: using \texttt{ios\_base::sync\_with\_stdio(false);} at the start of your program
-        \item<3-> C++: reducing flush operations, use \texttt{'\textbackslash n'} instead of \texttt{endl}
-        \item<4-> C++: using a custom built function to read integers: \href{https://github.com/SuprDewd/CompetitiveProgramming/blob/master/code/tricks/fast_input.cpp}{LINK}
-        \item<5-> Python: use \texttt{sys.stdin} and \texttt{sys.stdout}, only flush when needed. Note that \texttt{print} and \texttt{input} may flush your output, possibly slowing your program unnecessarily.
-        \item<6-> Java/C\#: I don't know how to make it fast, if I/O is a bottleneck, use a different language maybe? Kattio.java exists but isn't particularly fast compared to C++.
+        \item<2-> (C++) using \texttt{ios\_base::sync\_with\_stdio(false);} at the start of your program
+        \item<3-> (C++) reducing flush operations, use \texttt{'\textbackslash n'} instead of \texttt{endl}
+        \item<4-> (C++) using a custom built function to read integers: \href{https://github.com/SuprDewd/CompetitiveProgramming/blob/master/code/tricks/fast_input.cpp}{LINK}
+        \item<5-> (Python) using \texttt{sys.stdin} and \texttt{sys.stdout}, and only flushing when needed. Note that \texttt{print} and \texttt{input} may flush your output arbitrarily, possibly slowing your program unnecessarily.
+        \item<6-> (Java): I do not know how to make it fast, if I/O is a bottleneck, use a different language maybe? Kattio.java exists but is not even comparable to C++ speed.
     \end{itemize}
 \end{frame}
 
 \section*{Locality of Reference}
 
 \begin{frame}[plain]
-    \frametitle{Locality of Reference}
+    \frametitle{Coming Up!}
     \begin{itemize}
-        \item Some of the optimizations discussed beyond this point may or may not be done by the compiler depending on the code you write.
+        \item<1-> Some of the optimizations discussed beyond this point may or may not be done by the compiler depending on the code you write.
         \item<2-> The compiler is good at optimizing common patterns, but needs a little guidance sometimes.
         \item<3-> We will be examining a bit how data and instructions are processed by a CPU.
-        \item<4-> The CPU executes instructions, which it needs to access, on data, which it also needs to access.
-        \item<5-> Modern CPUs tend to separate these two and treat them differently.
-        \item<6-> Recently referenced, or used, data and instructions tend to be reused.
-        \item<7-> Temporal locality: A recently accessed (memory) address is likely to be accessed in the near future.
-        \item<8-> Spatial locality: An address nearby a recently accessed address likely to be accessed in the near future.
+        \item<4-> Be aware that microbenchmarks such as the ones I made for the slides may not always mean the changes translate perfectly into efficiency for real world code.
+        \item<5-> The intent is to teach you the ideas. Do not assume that doing things manually guarantees speed increases! Try it out!
+    \end{itemize}
+\end{frame}
+
+\begin{frame}[plain]
+    \frametitle{Locality of Reference}
+    \begin{itemize}
+        \item<1-> The CPU executes instructions, which it needs to load, on data, which it also needs to load.
+        \item<2-> Modern CPUs tend to separate these two and treat them differently.
+        \item<3-> Recently referenced, or used, data and instructions tend to be reused.
+        \item<4-> Temporal locality: A recently accessed (memory) address is likely to be accessed in the near future.
+        \item<5-> Spatial locality: An address nearby a recently accessed address likely to be accessed in the near future.
     \end{itemize}
 \end{frame}
 
@@ -138,13 +159,12 @@ int sum_by_row(int arr[N][M]){
         \end{minted}
     \end{scriptsize}
     \begin{itemize}
-        \item<2-> Now the inner loop jumps between addresses in steps of size $1$.
-        \item<3-> So how much of a difference does this make?
-        \item<4-> I tested with my \href{https://www.intel.com/content/www/us/en/products/sku/75048/intel-core-i54670k-processor-6m-cache-up-to-3-80-ghz/specifications.html}{Intel\textregistered Core\texttrademark i5-4670K}
-        \item<5-> Setting $N = M = 10\,000$ to get a sufficiently large array, so $10^8$ additions will be performed by each function.
-        \item<6-> The function \texttt{sum\_by\_col} takes approximately $1.025$ seconds on average.
-        \item<7-> The function \texttt{sum\_by\_row} takes approximately $0.041$ seconds on average.
-        \item<8-> A factor of $25$, so not negligible at all! Note that L2 caches generally perform about $25$ times faster than RAM.
+        \item<2-> Now the inner loop jumps between addresses in steps of size $1$. So how much of a difference does this make?
+        \item<3-> I tested with my \href{https://www.intel.com/content/www/us/en/products/sku/75048/intel-core-i54670k-processor-6m-cache-up-to-3-80-ghz/specifications.html}{Intel\textregistered Core\texttrademark i5-4670K}
+        \item<4-> Setting $N = M = 10\,000$ to get a sufficiently large array, so $10^8$ additions will be performed by each function.
+        \item<5-> The function \texttt{sum\_by\_col} takes approximately $1.025$ seconds on average.
+        \item<6-> The function \texttt{sum\_by\_row} takes approximately $0.041$ seconds on average.
+        \item<7-> A factor of $25$, so not negligible at all! Note that L2 caches generally perform about $25$ times faster than RAM.
     \end{itemize}
 \end{frame}
 
@@ -237,8 +257,9 @@ int intersection(int a, int b) {
         \item<3-> We have \texttt{\_\_builtin\_parity}, which returns 1 if odd number of bits are set.
         \item<4-> We have \texttt{\_\_builtin\_ffs}, which finds the index of the first set bit.
         \item<5-> For \texttt{long long} add the suffix \texttt{ll}.
-        \item<6-> What if $D = 60$? We could use 64-bit integers.
-        \item<7-> What if $D > 64$?
+        \item<7-> Note, that in \texttt{C++20} and up, you should use the \texttt{std} versions in the header \texttt{<bit>}
+        \item<8-> What if $D = 60$? We could use 64-bit integers.
+        \item<9-> What if $D > 64$?
     \end{itemize}
 \end{frame}
 
@@ -247,15 +268,235 @@ int intersection(int a, int b) {
 \begin{frame}
     \frametitle{The Infamous Bitset}
     \begin{itemize}
-        \item 
+        \item We have seen that representing a set using an integer and bit operations is more efficient than an array of integers.
+        \item<2-> Bitwise instructions are generally faster than arithmetic ones.
+        \item<3-> Representing a set of integers as bits is also memory efficient and stored sequentially, meaning it is cache friendly.
+        \item<4-> To extend this past size $64$ we could use \texttt{\_\_int128}, but that only takes us so far.
+        \item<5-> We must also keep in mind the word size $w$ on our machines. Modern machines usually are 64-bit, so $w=64$.
+        \item<6-> We could make a size $\left\lceil \frac{D}{w} \right\rceil$ array using $w$-bit integers to store our set.
+        \item<7-> Implementing this includes a lot of shifts and indexing and it is easy to make a mistake and get it wrong.
     \end{itemize}
 \end{frame}
 
-\section*{Unrolling Loops}
+\begin{frame}[plain,fragile]
+    \frametitle{It Is Our Lucky Day!}
+    \begin{itemize}
+        \item We have in the standard library a data structure known as \texttt{bitset}
+        \item<2-> It is in essence a boolean array
+        \item<3-> How much memory does \texttt{bool arr[1 << 30]} take?
+        \item<4-> Despite booleans only requiring one bit, the data type \texttt{bool} is a byte.
+        \item<5-> The array is therefore $1024^3$ bytes or $1$ Gibibyte.
+        \item<6-> Bitsets use the method discussed previously, packing $8$ booleans in each byte.
+        \item<7-> A \texttt{bitset<1 << 30>} is therefore $1024^3$ bits or $128$ Mebibytes.
+    \end{itemize}
+\end{frame}
 
-\section*{Branching and Branchless Programming}
+\begin{frame}[plain,fragile]
+    \frametitle{A Scheduling Problem - Now With Bitsets}
+    \begin{minted}{cpp}
+constexpr int D{ 365 };
+constexpr int max_n{ 5'000 };
+bitset<D> workers[max_n];
+int intersection(int i, int j) {
+    return (workers[i] & workers[j]).count();
+}
+    \end{minted}
+    \begin{itemize}
+        \item<2-> We must declare the bitset at compile time since the size is given as a template argument.
+        \item<3-> The bitwise operations of a bitset of size $D$ have complexity $\mathcal{O}\left(\frac{D}{w}\right)$.
+        \item<4-> Total time complexity of the solution using bitsets is $\mathcal{O}\left(N^2 \frac{D}{w}\right)$.
+        \item<5-> On a 64-bit machine this is definitely fast enough.
+        \item<6-> Practice problem: \href{https://www.codechef.com/problems/CHEFQUE}{Chef and Queries}
+    \end{itemize}
+\end{frame}
 
-\section*{Single Instruction, Multiple Data}
+\section*{Branching}
+
+\begin{frame}
+    \frametitle{Do Repeat Yourself}
+    \begin{itemize}
+        \item Any time you make code reusable, you may be slowing your program down. Generalized code is slower.
+        \item<2-> OOP was (is?) very popular and people tend to overuse inheritance, just because they are used to OOP.
+        \item<3-> Inheritance can be a massive slowdown, similar to the factor seen before with cache locality. I would advise you to avoid it when you can.
+        \item<4-> Moving a piece of code to a function means you have to call the function, which adds overhead. In C++, the compiler may inline your function, removing the overhead of a function call.
+        \item<5-> This is why iterative code is generally faster than recursive code. Some languages support tail recursion which removes the recursive overhead in specific cases.
+        \item<6-> Even loops may slow your code down. Why?
+    \end{itemize}
+\end{frame}
+
+\begin{frame}
+    \frametitle{Branching}
+    \begin{itemize}
+        \item You know what else slows down your code? If statements.
+        \item<2-> They create a branch, such that either the CPU steps to the next address or jumps to an address somewhere else.
+        \item<3-> For good cache usage, the likely option should be the step to the next address.
+        \item<4-> The compiler is good at guessing what is likely, but you may guide it using annotations \texttt{[[unlikely]]}. This is known as branch prediction.
+        \item<5-> Loops are the same, either you repeat or break from the loop.
+        \item<6-> A higher number of iterations on average with less branching is often faster.
+    \end{itemize}
+\end{frame}
+
+% Branching: 363552
+% Branching 2: 346428
+% Branching 4: 341413
+% Branching 16: 343414
+% Branchless: 115715
+% Branchless 4: 103367
+% Branchless 16: 98512
+% SIMD: 97663
+% SIMD 4: 93710
+
+
+\begin{frame}[plain, fragile]
+    \frametitle{Ternary Sum}
+    \begin{minted}{cpp}
+constexpr int N{ 100'000'000 };
+int arr[N];
+int regular_loop(int arr[N]) {
+    int sm = 0;
+    for (int i = 0; i < N; i++) {
+        if (arr[i] % 3 == 0) sm -= arr[i];
+        else if (arr[i] % 3 == 2) sm += arr[i];
+    }
+    return sm;
+}
+    \end{minted}
+    \begin{itemize}
+        \item This code adds up all the numbers in an array with a slight modification.
+        \item<2-> The time complexity is linear, but we have $10^8$ elements.
+        \item<3-> Running this code on my machine takes $0.363$ seconds on average.
+        \item<4-> We can shave off a little by repeating ourselves.
+    \end{itemize}
+\end{frame}
+
+\begin{frame}[plain, fragile]
+    \frametitle{Ternary Sum - Unrolling}
+    \begin{minted}{cpp}       
+constexpr int N{ 100'000'000 };
+int arr[N];
+int unroll_2_loop(int arr[N]) {
+    int sm = 0;
+    for (int i = 0; i < N; i+=2) {
+        if (arr[i] % 3 == 0) sm -= arr[i];
+        else if (arr[i] % 3 == 2) sm += arr[i];
+        if (arr[i+1] % 3 == 0) sm -= arr[i+1];
+        else if (arr[i+1] % 3 == 2) sm += arr[i+1];
+    }
+    return sm;
+}
+    \end{minted}
+    \begin{itemize}
+        \item By repeating ourselves, we reduce branching just a tiny bit.
+        \item<2-> This is known as unrolling loops and your compiler is likely to do this with the \texttt{-Ofast} flag.
+        \item<3-> Running this code on my machine takes $0.346$ seconds on average.
+        \item<4-> It is consistently faster, but not by much.
+        \item<5-> Bumping up to $4$ elements per iteration gets us to $0.340$ seconds. Again, a tiny improvement.
+    \end{itemize}
+\end{frame}
+
+\begin{frame}[plain, fragile]
+    \frametitle{Ternary Sum - Branchless}
+    \begin{minted}{cpp}
+constexpr int N{ 100'000'000 };
+int arr[N];
+int branchless(int arr[N]) {
+    int sm = 0;
+    for (int i = 0; i < N; i++) {
+        sm += (arr[i] % 3 - 1) * arr[i];
+    }
+    return sm;
+}
+    \end{minted}
+    \begin{itemize}
+        \item Often we can use multiplication or bitmasks as a replacement for arithmetic within if blocks.
+        \item<2-> This removes the branching within the loop. The only branch is at the end of iteration.
+        \item<3-> Running this code on my machine takes $0.115$ seconds on average.
+        \item<4-> Branchless programming is a good way to get fast and reliable execution times.
+        \item<5-> When writing cryptographic code, it is also a security measure against timing attacks.
+    \end{itemize}
+\end{frame}
+
+\begin{frame}[plain, fragile]
+    \frametitle{Ternary Sum - Unrolled Branchless}
+    \begin{minted}{cpp}
+constexpr int N{ 100'000'000 };
+int arr[N];
+int branchless_16(int arr[N]) {
+    int sm = 0;
+    for (int i = 0; i < N; i+=16) {
+        sm += (arr[i] % 3 - 1) * arr[i];
+        sm += (arr[i+1] % 3 - 1) * arr[i+1];
+        // ...
+        sm += (arr[i+15] % 3 - 1) * arr[i+15];
+    }
+    return sm;
+}
+    \end{minted}
+    \begin{itemize}
+        \item Unrolling the branchless version like this gets us down to $0.098$ seconds.
+        \item<2-> We have an almost $4$ times speedup from the original version.
+        \item<3-> Note that if you are dong simple things, the compiler may produce this version from the original version.
+        \item<4-> Another common way to get branchless code is to use ternary operators.
+        \item<5-> Compute both the values $a$ and $b$ and then perform an assignment \texttt{c = condition ? a : b}
+    \end{itemize}
+\end{frame}
+
+\section*{Single Instruction, Multiple Data (SIMD)}
+\begin{frame}[plain]
+    \frametitle{SIMD}
+    \begin{itemize}
+        \item You may know that your CPU has $64$-bit registers.
+        \item<2-> It executes instructions on the contents of the registers.
+        \item<3-> Your CPU also has larger $256$ or $512$-bit registers for vectorized instructions.
+        \item<4-> This allows you to perform a single instruction on multiple data, potentially speeding up execution by a factor of $4-8$.
+        \item<5-> The compiler may vectorize simple patterns for you, such as a simple sum of elements,
+                  but in my limited experience you have to get your hands dirty for guarantees.
+        \item<6-> See \href{https://www.intel.com/content/www/us/en/docs/intrinsics-guide/index.html}{documentation} for details on functions.
+    \end{itemize}
+\end{frame}
+
+\begin{frame}[plain, fragile]
+    \frametitle{SIMD}
+    \begin{minted}{cpp}
+#include <x86intrin.h> // includes all SIMD intrinsics
+constexpr int N{ 100'000'000 };
+int arr[N];
+int simd(int arr[N]) {
+    __m128i sm = _mm_setzero_si128();
+    __m128i one = _mm_set_epi32(1, 1, 1, 1);
+    for (size_t i = 0; i < N; i+=4) {
+        __m128i nums = _mm_loadu_si128((__m128i*) (arr+i));
+        __m128i to_add = _mm_set_epi32(arr[i+3]%3, arr[i+2]%3, arr[i+1]%3, arr[i]%3);
+        to_add = _mm_sub_epi32(to_add, one);
+        to_add = _mm_mullo_epi32(to_add, nums);
+        sm = _mm_add_epi32(sm, to_add);
+    }
+    int res= 0;
+    res += _mm_cvtsi128_si32(sm);
+    res += _mm_cvtsi128_si32(_mm_bsrli_si128(sm, 4));
+    res += _mm_cvtsi128_si32(_mm_bsrli_si128(sm, 8));
+    res += _mm_cvtsi128_si32(_mm_bsrli_si128(sm, 12));
+    return res;
+}
+    \end{minted}
+    \begin{itemize}
+        \item The example above does not see the best performance gain possible for SIMD. The modulo operation has no vectorized version.
+        \item<2-> Despite that, this version takes $0.097$ seconds on average, faster than the unrolled branchless code.
+        \item<3-> You can unroll this from $4$ computations to $16$ to get down to $0.094$ seconds.
+        \item<4-> You could however implement a linear search or something without division/modulo and see massive performance gains.
+    \end{itemize}
+\end{frame}
+
+\begin{frame}[plain]
+    \frametitle{Summary}
+    \begin{itemize}
+        \item There are many ways to improve performance of a program by constant factors.
+        \item<2-> Most of them rely on improving cache utilization or limiting the number instructions.
+        \item<3-> The compiler may do these things for you, but it also may not, you can check after compiling!
+        \item<4-> When you do it yourself it is crucial to test whether it is actually faster.
+        \item<5-> Constant time improvements are sometimes easier than algorithmic improvements, and may prove sufficient.
+    \end{itemize}
+\end{frame}
 
 \end{document}
 
