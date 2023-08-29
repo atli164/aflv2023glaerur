@@ -1,4 +1,4 @@
-\documentclass[11pt]{beamer}
+\documentclass[10pt]{beamer}
 \usefonttheme[onlymath]{serif}
 \usepackage[T1]{fontenc}
 \usepackage[utf8]{inputenc}
@@ -162,8 +162,8 @@ int sum_by_row(int arr[N][M]){
         \item<1-> Now the inner loop jumps between addresses in steps of size $1$. 
         \item<2-> I tested with my \href{https://www.intel.com/content/www/us/en/products/sku/75048/intel-core-i54670k-processor-6m-cache-up-to-3-80-ghz/specifications.html}{Intel\textregistered Core\texttrademark i5-4670K}
         \item<3-> Setting $N = M = 10\,000$, so $10^8$ additions.
-        \item<4-> The function \texttt{sum\_by\_col} takes approximately $1.025$ seconds on average.
-        \item<5-> The function \texttt{sum\_by\_row} takes approximately $0.041$ seconds on average.
+        \item<4-> The function \texttt{sum\_by\_col} runs in $1.025$ seconds.
+        \item<5-> The function \texttt{sum\_by\_row} runs in $0.041$ seconds.
         \item<6-> A factor of $25$, so not negligible at all! Note that L2 caches generally perform about $25$ times faster than RAM.
     \end{itemize}
 \end{frame}
