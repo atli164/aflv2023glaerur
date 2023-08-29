@@ -207,7 +207,7 @@ int intersection(int a, int b) {
         \end{minted}
     \end{scriptsize}
     \begin{itemize}
-        \item<2-> We can determine the best pair using this function and iterating through all pairs.
+        \item<2-> We can determine the best pair using this function and iterate through all pairs.
         \item<3-> The time complexity is $\mathcal{O}(N^2D)$, in our case $D=30$.
         \item<4-> Too slow.
     \end{itemize}
@@ -263,12 +263,12 @@ int intersection(int a, int b) {
     \begin{itemize}
         \item<1-> We have \texttt{\_\_builtin\_ctz}, which counts trailing zeros.
         \item<2-> We have \texttt{\_\_builtin\_clz}, which counts leading zeros.
-        \item<3-> We have \texttt{\_\_builtin\_parity}, which returns 1 if odd number of bits are set.
+        \item<3-> We have \texttt{\_\_builtin\_parity}, which returns 1 if odd number of bits are set, but 0 if even.
         \item<4-> We have \texttt{\_\_builtin\_ffs}, which finds the index of the first set bit.
         \item<5-> For \texttt{long long} add the suffix \texttt{ll}.
-        \item<7-> Note, that in \texttt{C++20} and up, you should use the \texttt{std} versions in the header \texttt{<bit>}
-        \item<8-> What if $D = 60$? We could use 64-bit integers.
-        \item<9-> What if $D > 64$?
+        \item<6-> Note, that in \texttt{C++20} and up, you should use the \texttt{std} versions in the header \texttt{<bit>}
+        \item<7-> What if $D = 60$? We could use 64-bit integers.
+        \item<8-> What if $D > 64$?
     \end{itemize}
 \end{frame}
 
@@ -290,13 +290,13 @@ int intersection(int a, int b) {
 \begin{frame}[plain,fragile]
     \frametitle{It Is Our Lucky Day!}
     \begin{itemize}
-        \item We have in the standard library a data structure known as \texttt{bitset}
-        \item<2-> It is in essence a boolean array
+        \item We have in the standard library a data structure known as \texttt{bitset}.
+        \item<2-> It is, in essence, a boolean array.
         \item<3-> How much memory does \texttt{bool arr[1 << 30]} take?
         \item<4-> Despite booleans only requiring one bit, the data type \texttt{bool} is a byte.
         \item<5-> The array is therefore $1024^3$ bytes or $1$ Gibibyte.
         \item<6-> Bitsets use the method discussed previously, packing $8$ booleans in each byte.
-        \item<7-> A \texttt{bitset<1 << 30>} is therefore $1024^3$ bits or $128$ Mebibytes.
+        \item<7-> A \texttt{bitset<1 \textless\textless 30>} is therefore $1024^3$ bits or $128$ Mebibytes.
     \end{itemize}
 \end{frame}
 
@@ -304,9 +304,9 @@ int intersection(int a, int b) {
     \frametitle{A Scheduling Problem - Now With Bitsets}
     \begin{scriptsize}
         \begin{minted}{cpp}
-constexpr int D{ 365 };
+constexpr int d{ 365 };
 constexpr int max_n{ 5'000 };
-bitset<D> workers[max_n];
+bitset<d> workers[max_n];
 int intersection(int i, int j) {
     return (workers[i] & workers[j]).count();
 }
@@ -317,7 +317,7 @@ int intersection(int i, int j) {
         \item<3-> The bitwise operations of a bitset of size $D$ have complexity $\mathcal{O}\left(\frac{D}{w}\right)$.
         \item<4-> Total time complexity of the solution using bitsets is $\mathcal{O}\left(N^2 \frac{D}{w}\right)$.
         \item<5-> On a 64-bit machine this is definitely fast enough.
-        \item<6-> Practice problem: \href{https://www.codechef.com/problems/CHEFQUE}{Chef and Queries}
+        \item<6-> Practice problems: \href{https://www.codechef.com/problems/CHEFQUE}{Chef and Queries}, \href{https://www.codechef.com/AABH2020/problems/ODTPIC}{Odd Topic}
     \end{itemize}
 \end{frame}
 
@@ -499,13 +499,13 @@ int simd(int arr[N]) {
     return res;
 }
         \end{minted}
-    \end{tiny}
     \begin{itemize}
         \item The example above does not see the best performance gain possible for SIMD. The modulo operation has no vectorized version.
         \item<2-> Despite that, this version takes $0.097$ seconds on average, faster than the unrolled branchless code.
         \item<3-> You can unroll this from $4$ computations to $16$ to get down to $0.094$ seconds.
         \item<4-> You could however implement a linear search or something without division/modulo and see massive performance gains.
     \end{itemize}
+    \end{tiny}
 \end{frame}
 
 \begin{frame}[plain]
