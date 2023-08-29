@@ -435,7 +435,7 @@ int branchless(int arr[N]) {
 
 \begin{frame}[plain, fragile]
     \frametitle{Ternary Sum - Unrolled Branchless}
-    \begin{scriptsize}
+    \begin{tiny}
         \begin{minted}{cpp}
 constexpr int N{ 100'000'000 };
 int arr[N];
@@ -450,7 +450,7 @@ int branchless_16(int arr[N]) {
     return sm;
 }
         \end{minted}
-    \end{scriptsize}
+    \end{tiny}
     \begin{itemize}
         \item Unrolling the branchless version like this gets us down to $0.098$ seconds.
         \item<2-> We have an almost $4$ times speedup from the original version.
