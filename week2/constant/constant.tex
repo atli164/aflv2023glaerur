@@ -95,7 +95,7 @@
         \item<2-> Modern CPUs tend to separate these two and treat them differently.
         \item<3-> Recently referenced, or used, data and instructions tend to be reused.
         \item<4-> Temporal locality: A recently accessed (memory) address is likely to be accessed in the near future.
-        \item<5-> Spatial locality: An address nearby a recently accessed address likely to be accessed in the near future.
+        \item<5-> Spatial locality: An address nearby a recently accessed address is likely to be accessed in the near future.
     \end{itemize}
 \end{frame}
 
@@ -159,12 +159,12 @@ int sum_by_row(int arr[N][M]){
         \end{minted}
     \end{scriptsize}
     \begin{itemize}
-        \item<2-> Now the inner loop jumps between addresses in steps of size $1$. So how much of a difference does this make?
-        \item<3-> I tested with my \href{https://www.intel.com/content/www/us/en/products/sku/75048/intel-core-i54670k-processor-6m-cache-up-to-3-80-ghz/specifications.html}{Intel\textregistered Core\texttrademark i5-4670K}
-        \item<4-> Setting $N = M = 10\,000$ to get a sufficiently large array, so $10^8$ additions will be performed by each function.
-        \item<5-> The function \texttt{sum\_by\_col} takes approximately $1.025$ seconds on average.
-        \item<6-> The function \texttt{sum\_by\_row} takes approximately $0.041$ seconds on average.
-        \item<7-> A factor of $25$, so not negligible at all! Note that L2 caches generally perform about $25$ times faster than RAM.
+        \item<1-> Now the inner loop jumps between addresses in steps of size $1$. 
+        \item<2-> I tested with my \href{https://www.intel.com/content/www/us/en/products/sku/75048/intel-core-i54670k-processor-6m-cache-up-to-3-80-ghz/specifications.html}{Intel\textregistered Core\texttrademark i5-4670K}
+        \item<3-> Setting $N = M = 10\,000$, so $10^8$ additions.
+        \item<4-> The function \texttt{sum\_by\_col} takes approximately $1.025$ seconds on average.
+        \item<5-> The function \texttt{sum\_by\_row} takes approximately $0.041$ seconds on average.
+        \item<6-> A factor of $25$, so not negligible at all! Note that L2 caches generally perform about $25$ times faster than RAM.
     \end{itemize}
 \end{frame}
 
@@ -172,17 +172,21 @@ int sum_by_row(int arr[N][M]){
 	\frametitle{A Scheduling Problem - From Errichto on CF}
 	\begin{block}{Problem description}
         There are $N$ workers, where $1 \leq N \leq 5\,000$.
-        Each worker is either available or unavailable each day.
         There is a $30$ day window for a two man group project.
+
+        Each worker is either available or unavailable each day.
+        You are given the list of days on which each worker is available.
         The project can only be worked on if both group members are available.
         You may assume all workers are equally competent, so you only want to maximize the number of days they work together.
+
         What is the best pair of workers to select?
     \end{block}
 \end{frame}
 
 \begin{frame}[plain,fragile]
 	\frametitle{A Scheduling Problem - Slow Solution}
-    \begin{minted}{cpp}
+    \begin{scriptsize}
+        \begin{minted}{cpp}
 vector<vector<int>> workers;
 int intersection(int a, int b) {
     int i = 0, j = 0;
@@ -200,7 +204,8 @@ int intersection(int a, int b) {
     }
     return result;
 }
-    \end{minted}
+        \end{minted}
+    \end{scriptsize}
     \begin{itemize}
         \item<2-> We can determine the best pair using this function and iterating through all pairs.
         \item<3-> The time complexity is $\mathcal{O}(N^2D)$, in our case $D=30$.
@@ -210,7 +215,8 @@ int intersection(int a, int b) {
 
 \begin{frame}[plain,fragile]
 	\frametitle{A Scheduling Problem - Less Slow Solution}
-    \begin{minted}{cpp}
+    \begin{scriptsize}
+        \begin{minted}{cpp}
 vector<int> workers;
 int intersection(int a, int b) {
     int result = 0;
@@ -223,7 +229,8 @@ int intersection(int a, int b) {
     }
     return result;
 }
-    \end{minted}
+        \end{minted}
+    \end{scriptsize}
     \begin{itemize}
         \item Lets store the availability as bitmasks.
         \item<2-> This allows us to pack our data more efficiently, which will improve our cache usage.
@@ -234,18 +241,20 @@ int intersection(int a, int b) {
 
 \begin{frame}[plain,fragile]
 	\frametitle{A Scheduling Problem - Magic Solution}
-    \begin{minted}{cpp}
+    \begin{scriptsize}
+        \begin{minted}{cpp}
 vector<int> workers;
 int intersection(int a, int b) {
     return __builtin_popcount(workers[a] & workers[b]);
 }
-    \end{minted}
+        \end{minted}
+    \end{scriptsize}
     \begin{itemize}
         \item What sorcery is this?
         \item<2-> Popcount is the number of set bits, or ones, in the binary representation of the number.
         \item<3-> It's time complexity is $\mathcal{O}(1)$ and most CPUs have it as a single instruction.
         \item<4-> Now our time complexity is $\mathcal{O}(N^2)$ and the code runs fast enough.
-        \item<4-> But wait, there is more!
+        \item<5-> But wait, there is more!
     \end{itemize}
 \end{frame}
 
@@ -293,14 +302,16 @@ int intersection(int a, int b) {
 
 \begin{frame}[plain,fragile]
     \frametitle{A Scheduling Problem - Now With Bitsets}
-    \begin{minted}{cpp}
+    \begin{scriptsize}
+        \begin{minted}{cpp}
 constexpr int D{ 365 };
 constexpr int max_n{ 5'000 };
 bitset<D> workers[max_n];
 int intersection(int i, int j) {
     return (workers[i] & workers[j]).count();
 }
-    \end{minted}
+        \end{minted}
+    \end{scriptsize}
     \begin{itemize}
         \item<2-> We must declare the bitset at compile time since the size is given as a template argument.
         \item<3-> The bitwise operations of a bitset of size $D$ have complexity $\mathcal{O}\left(\frac{D}{w}\right)$.
@@ -349,7 +360,8 @@ int intersection(int i, int j) {
 
 \begin{frame}[plain, fragile]
     \frametitle{Ternary Sum}
-    \begin{minted}{cpp}
+    \begin{scriptsize}
+        \begin{minted}{cpp}
 constexpr int N{ 100'000'000 };
 int arr[N];
 int regular_loop(int arr[N]) {
@@ -360,7 +372,8 @@ int regular_loop(int arr[N]) {
     }
     return sm;
 }
-    \end{minted}
+        \end{minted}
+    \end{scriptsize}
     \begin{itemize}
         \item This code adds up all the numbers in an array with a slight modification.
         \item<2-> The time complexity is linear, but we have $10^8$ elements.
@@ -371,7 +384,8 @@ int regular_loop(int arr[N]) {
 
 \begin{frame}[plain, fragile]
     \frametitle{Ternary Sum - Unrolling}
-    \begin{minted}{cpp}       
+    \begin{scriptsize}
+        \begin{minted}{cpp}       
 constexpr int N{ 100'000'000 };
 int arr[N];
 int unroll_2_loop(int arr[N]) {
@@ -384,7 +398,8 @@ int unroll_2_loop(int arr[N]) {
     }
     return sm;
 }
-    \end{minted}
+        \end{minted}
+    \end{scriptsize}
     \begin{itemize}
         \item By repeating ourselves, we reduce branching just a tiny bit.
         \item<2-> This is known as unrolling loops and your compiler is likely to do this with the \texttt{-Ofast} flag.
@@ -396,7 +411,8 @@ int unroll_2_loop(int arr[N]) {
 
 \begin{frame}[plain, fragile]
     \frametitle{Ternary Sum - Branchless}
-    \begin{minted}{cpp}
+    \begin{scriptsize}
+        \begin{minted}{cpp}
 constexpr int N{ 100'000'000 };
 int arr[N];
 int branchless(int arr[N]) {
@@ -406,7 +422,8 @@ int branchless(int arr[N]) {
     }
     return sm;
 }
-    \end{minted}
+        \end{minted}
+    \end{scriptsize}
     \begin{itemize}
         \item Often we can use multiplication or bitmasks as a replacement for arithmetic within if blocks.
         \item<2-> This removes the branching within the loop. The only branch is at the end of iteration.
@@ -418,7 +435,8 @@ int branchless(int arr[N]) {
 
 \begin{frame}[plain, fragile]
     \frametitle{Ternary Sum - Unrolled Branchless}
-    \begin{minted}{cpp}
+    \begin{scriptsize}
+        \begin{minted}{cpp}
 constexpr int N{ 100'000'000 };
 int arr[N];
 int branchless_16(int arr[N]) {
@@ -431,7 +449,8 @@ int branchless_16(int arr[N]) {
     }
     return sm;
 }
-    \end{minted}
+        \end{minted}
+    \end{scriptsize}
     \begin{itemize}
         \item Unrolling the branchless version like this gets us down to $0.098$ seconds.
         \item<2-> We have an almost $4$ times speedup from the original version.
@@ -457,7 +476,8 @@ int branchless_16(int arr[N]) {
 
 \begin{frame}[plain, fragile]
     \frametitle{SIMD}
-    \begin{minted}{cpp}
+    \begin{tiny}
+        \begin{minted}{cpp}
 #include <x86intrin.h> // includes all SIMD intrinsics
 constexpr int N{ 100'000'000 };
 int arr[N];
@@ -478,7 +498,8 @@ int simd(int arr[N]) {
     res += _mm_cvtsi128_si32(_mm_bsrli_si128(sm, 12));
     return res;
 }
-    \end{minted}
+        \end{minted}
+    \end{tiny}
     \begin{itemize}
         \item The example above does not see the best performance gain possible for SIMD. The modulo operation has no vectorized version.
         \item<2-> Despite that, this version takes $0.097$ seconds on average, faster than the unrolled branchless code.
