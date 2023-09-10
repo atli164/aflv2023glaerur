@@ -295,27 +295,26 @@ int main() {
     \end{itemize}
 \end{frame}
 
-\begin{frame}[plain,fragile]{Bottom-up egg drop solution}
-    \begin{minted}[fontsize=\scriptsize]{cpp}
-#include<bits/stdc++.h>
-using namespace std;
+\begin{frame}[plain]{Egg dropping problem}
+    \vspace{10pt}
 
-int main() {
-    int n, k;
-    cin >> n >> k;
-    vector<vector<int>> eggdp(n + 1, vector<int>(k + 1, INT_MAX));
-    for(int i = 1; i <= n; ++i)
-        eggdp[i][1] = 1, eggdp[i][0] = 0;
-    for(int i = 1; i <= k; ++i)
-        eggdp[1][i] = i;
-    for(int i = 2; i <= n; ++i)
-        for(int j = 2; j <= k; ++j)
-            for(int x = 1; x <= j; ++x)
-                eggdp[i][j] = min(eggdp[i][j], 
-                    1 + max(eggdp[i - 1][x - 1], eggdp[i][j - x]));
-    cout << eggdp[n][k] << '\n';
-}
-    \end{minted}
+    \begin{itemize}
+        \item Let $f(n, k)$ be the minimum number of trials for $n$ eggs and $k$ floors. 
+        \item We note that if we have one egg, we must always go through the floors in order since we can't afford to break an egg.
+        \item All together this gives us
+        \[f(i, j) = \begin{cases}1 \text{ if } k = 1 \\0 \text{ if } k = 0\\k \text{ if } i = 1\\ \min_{1 \leq x \leq k} 1 + \max(f(i - 1, x - 1), f(i, j - x))\end{cases}\]
+        \item We see that this takes $O(k)$ per state and we have $O(nk)$ states, so the time complexity is $O(nk^2)$.
+    \end{itemize}
+\end{frame}
+
+\begin{frame}[plain]{Egg dropping problem}
+    \vspace{10pt}
+
+    \begin{itemize}
+        \item As a side note, this can also be solved in $O(nk)$ with a different dynamic programming approach. Try considering calculating the maximum number of floors you can check with $n$ eggs and $k$ trials using dynamic programming.
+        
+        \item Using some more clever ideas this can even be brought down to $O(n\log(k))$, but we won't need this here.
+    \end{itemize}
 \end{frame}
 
 % Fleiri dæmi
