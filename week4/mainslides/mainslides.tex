@@ -240,6 +240,18 @@ int main() {
     \end{minted}
 \end{frame}
 
+\begin{frame}[plain]{Multidimensional DP comment}
+    \vspace{10pt}
+
+    \begin{itemize}
+		\item The order in which you put the dimensions in a multidimensional dp can affect the running time.
+		
+		\item This is due to cache locality, so if you are fetching sequentially from one dimension and not the other, this can make one order faster.    
+    
+        \item Usually it doesn't matter, but in a few cases it might.
+    \end{itemize}
+\end{frame}
+
 \begin{frame}[plain]{Knapsack problem}
     \vspace{10pt}
 
