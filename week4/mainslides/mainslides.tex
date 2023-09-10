@@ -169,14 +169,11 @@ int a[N];
 int dp[N][SIGMA]; 
 // use int so -1 is unmemoized
 // 0 and 1 are the bools as usual
-memset(dp, -1, sizeof(dp));
 bool subsetsum(int i, int s) {
-	if(i == 0) return s == 0;
-	if(s < 0) return false;
-	if(dp[i][s] == -1) {
-		dp[i][s] = subsetsum(i - 1, s) | subsetsum(i - 1, j - a[i]);
-	}
-	return dp[i][s];
+    if(i < 0) return s == 0;
+    if(s < 0) return false;
+    if(dp[i][s] != -1) return dp[i][s];
+    return dp[i][s] = subsetsum(i - 1, s) || subsetsum(i - 1, s - a[i]);
 }
     \end{minted}
 \end{frame}
@@ -195,20 +192,22 @@ bool subsetsum(int i, int s) {
 
 \begin{frame}[plain,fragile]{Subset sum problem}
     \begin{minted}[fontsize=\scriptsize]{cpp}
+#include<bits/stdc++.h>
+using namespace std;
 vector<int> a;
 vector<vector<int>> dp, mv;
 bool subsetsum(int i, int s) {
-	if(i == 0) return s == 0;
+	if(i < 0) return s == 0;
 	if(s < 0) return false;
-	if(dp[i][s] == -1) {
-		if(subsetsum(i - 1, s)) {
-			dp[i][s] = 1;
-			mv[i][s] = 1;
-		} else if(subsetsum(i - 1, s - a[i])) {
-			dp[i][s] = 1;
-			mv[i][s] = 0;
-		}
-	}
+    if(dp[i][s] != -1) return dp[i][s];
+    dp[i][s] = 0;
+    if(subsetsum(i - 1, s)) {
+        dp[i][s] = 1;
+        mv[i][s] = 1;
+    } else if(subsetsum(i - 1, s - a[i])) {
+        dp[i][s] = 1;
+        mv[i][s] = 0;
+    }
 	return dp[i][s];
 }
     \end{minted}
@@ -241,8 +240,84 @@ int main() {
     \end{minted}
 \end{frame}
 
-% Knapsack
-% Egg/mailbox
+\begin{frame}[plain]{Knapsack problem}
+    \vspace{10pt}
+
+    \begin{itemize}
+        \item The subset sum problem time complexity is exponential, as the sums of the numbers is exponential in the size of the actual input. 
+        
+        \item Among similar "hard" problems (in terms of time complexity) is the knapsack problem.
+        
+        \item We have $n$ items, each with some value and some weight. We also have a knapsack with a maximum weight capacity and want to maximize the value with respect to this condition.
+    \end{itemize}
+\end{frame}
+
+\begin{frame}[plain]{Knapsack problem}
+    \vspace{10pt}
+
+    \begin{itemize}
+        \item We can once more use dynamic programming to solve this.
+        
+        \item We let $f(i, j)$ be the maximum value we can get from the first $i$ items if our maximum weight is $j$.
+       
+       	\item Let $v_1, \dots, v_n$ be the values and $w_1, \dots, w_n$ the weights. Then 	
+       	\[f(i, j) = \begin{cases}-\infty \text{ if } j < 0\\0 \text{ otherwise if } i = 0\\ \operatorname{max}(f(i - 1, j), f(i - 1, j - w_i) + v_i) \text{ otherwise}\end{cases}\]
+       	\item The time complexity is then $O(nS)$ where $S$ is the sum of the weights.
+       	\item We'll leave translating this into code as an exercise.
+    \end{itemize}
+\end{frame}
+
+\begin{frame}[plain]{Egg dropping problem}
+    \vspace{10pt}
+
+    \begin{itemize}
+        \item The previous problems are all very well known and classic in computer science. Let us also take a slightly less common example called the egg dropping problem.
+        
+        \item We have a building with $k$ floors and we wish to figure out from which floor we have to drop an egg so it breaks. I.e. for some $x$ dropping it from the $x$-th floor the egg will break, but dropping it from the $(x-1)$-st floor the egg won't break it.
+        
+        \item If we have $n$ eggs, how few trials can we get away with in the worst case?
+    \end{itemize}
+\end{frame}
+
+\begin{frame}[plain]{Egg dropping problem}
+    \vspace{10pt}
+
+    \begin{itemize}
+        \item Say we drop the egg from a floor $y$. 
+        
+        \item If the egg breaks, we only need to check floors $< y$ and have one less egg. This is essentially the same problem again but with $y - 1$ floors and $n - 1$ eggs.
+        
+        \item If the egg doesn't break we only need to check floors $> y$, so the problem is again the same with $k - y$ floors and $n$ eggs.
+        
+        \item Since we are looking at the worst case, our result is the worse of these two.
+        
+        \item Since we can choose any $y$, we take the best result among all $y$.
+    \end{itemize}
+\end{frame}
+
+\begin{frame}[plain,fragile]{Bottom-up egg drop solution}
+    \begin{minted}[fontsize=\scriptsize]{cpp}
+#include<bits/stdc++.h>
+using namespace std;
+
+int main() {
+    int n, k;
+    cin >> n >> k;
+    vector<vector<int>> eggdp(n + 1, vector<int>(k + 1, INT_MAX));
+    for(int i = 1; i <= n; ++i)
+        eggdp[i][1] = 1, eggdp[i][0] = 0;
+    for(int i = 1; i <= k; ++i)
+        eggdp[1][i] = i;
+    for(int i = 2; i <= n; ++i)
+        for(int j = 2; j <= k; ++j)
+            for(int x = 1; x <= j; ++x)
+                eggdp[i][j] = min(eggdp[i][j], 
+                    1 + max(eggdp[i - 1][x - 1], eggdp[i][j - x]));
+    cout << eggdp[n][k] << '\n';
+}
+    \end{minted}
+\end{frame}
+
 % Fleiri dæmi
 % Binary lifting / sparse table
 % DP optimization (LIS?)
