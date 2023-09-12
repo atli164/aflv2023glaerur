@@ -203,19 +203,63 @@
     \end{itemize}
 \end{frame}
 
+\begin{frame}[plain,fragile]{Simple Implementation}
+    \begin{scriptsize}
+        \begin{minted}{cpp}
+struct line {
+    ll m, b;
+    ll get(ll x) { return m*x + b; };
+    ll intersect(line other) { return (other.b - b) / (m - other.m); }
+};
+
+struct convex_hull_trick {
+    vector<line> lines;
+    void add(line l) {
+        auto sz = lines.size();
+        while (sz >= 2 && lines[sz-2].intersect(lines[sz-1]) >= lines[sz-2].intersect(l)) {
+            lines.pop_back();
+            sz--;
+        }
+        lines.push_back(l);
+    }
+    // to be continued...
+        \end{minted}
+    \end{scriptsize}
+\end{frame}
+
+\begin{frame}[plain,fragile]{Simple Implementation - Continued}
+    \begin{scriptsize}
+        \begin{minted}{cpp}
+    // ...continued
+    ll query(ll x) {
+        int lo = 0, hi = static_cast<int>(lines.size()) - 2;
+        int ind = hi+1;
+        while (lo <= hi) {
+            int mid = (lo+hi)/2;
+            if (lines[mid].intersect(lines[mid+1]) >= x) {
+                ind = mid;
+                hi = mid-1;
+            }
+            else {
+                lo = mid+1;
+            }
+        }
+        return lines[ind].get(x);
+    }
+};
+        \end{minted}
+    \end{scriptsize}
+\end{frame}
+
 \begin{frame}[plain,fragile]{Try on these problems!}
     \begin{itemize}
         \item \href{https://codeforces.com/contest/319/problem/C}{Kalila and Dimna in the Logging Industry}
         \item \href{https://open.kattis.com/problems/coveredwalkway}{Covered Walkway} (
         \item \href{https://dmoj.ca/problem/apio10p1}{Commando}
-        %\item \href{https://open.kattis.com/problems/avoidingairports}{Avoiding Airports}
-        %\item \href{https://open.kattis.com/problems/yatp}{YATP}
+        \item \href{https://open.kattis.com/problems/avoidingairports}{Avoiding Airports}
+        % \item \href{https://open.kattis.com/problems/yatp}{YATP}
     \end{itemize}
 \end{frame}
-
-\section*{Divide and Conquer Optimization}
-
-
 
 \end{document}
 
