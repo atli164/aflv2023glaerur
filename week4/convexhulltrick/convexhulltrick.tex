@@ -216,8 +216,10 @@ struct convex_hull_trick {
     vector<line> lines;
     void add(line l) {
         auto sz = lines.size();
-        while (sz >= 2 &&
-               lines[sz-2].intersect(lines[sz-1]) >= lines[sz-2].intersect(l)) {
+        while (
+            sz >= 2 &&
+            lines[sz-2].intersect(lines[sz-1]) >= lines[sz-2].intersect(l)
+        ) {
             lines.pop_back();
             sz--;
         }
