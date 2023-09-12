@@ -83,7 +83,7 @@
     \begin{itemize}
         \item<1-> Let $c_i$ be the minimum cost of cutting tree $i$.
         \item<2-> We can compute each $c_i$ by considering all possible trees $j < i$ that were the last tree to be cut.
-        \item<3-> \[ c_i = \min_{0 \le j < i}\left( c_j + b_j \cdot a_i ) \right) \]
+        \item<3-> \[ c_i = \min_{0 \le j < i}\left( c_j + b_j \cdot a_i \right) \]
         \item<4-> This directly translates to an $\mathcal{O}\left(N^{2}\right)$ dynamic programming solution.
         \item<5-> But $N$ can be $10^5$ which means this is not fast enough.
         \item<6-> Now substitute $c_j$ for $y_0$, $b_j$ for $m$ and $a_i$ for $x$. What do you get?
@@ -152,7 +152,7 @@
         \item<2-> Suppose we are adding a line to our data structure.
         \item<3-> Let $a$ be the intersection point of the new line and the second to last line in the data structure.
         \item<4-> Let $b$ be the intersection point of the last line and the second to last line in the data structure.
-        \item<5-> If the $x$-coordinate of $a$ is less than that of $b$, then the last line is redundant.
+        \item<5-> If the $x$-coordinate of $a$ is less than (or equal to) that of $b$, then the last line is redundant.
         \item<6-> We can therefore iteratively pop redundant lines from the back before adding a line.
     \end{itemize}
 \end{frame}
@@ -216,7 +216,8 @@ struct convex_hull_trick {
     vector<line> lines;
     void add(line l) {
         auto sz = lines.size();
-        while (sz >= 2 && lines[sz-2].intersect(lines[sz-1]) >= lines[sz-2].intersect(l)) {
+        while (sz >= 2 &&
+               lines[sz-2].intersect(lines[sz-1]) >= lines[sz-2].intersect(l)) {
             lines.pop_back();
             sz--;
         }
@@ -254,7 +255,7 @@ struct convex_hull_trick {
 \begin{frame}[plain,fragile]{Try on these problems!}
     \begin{itemize}
         \item \href{https://codeforces.com/contest/319/problem/C}{Kalila and Dimna in the Logging Industry}
-        \item \href{https://open.kattis.com/problems/coveredwalkway}{Covered Walkway} (
+        \item \href{https://open.kattis.com/problems/coveredwalkway}{Covered Walkway}
         \item \href{https://dmoj.ca/problem/apio10p1}{Commando}
         \item \href{https://open.kattis.com/problems/avoidingairports}{Avoiding Airports}
         % \item \href{https://open.kattis.com/problems/yatp}{YATP}
