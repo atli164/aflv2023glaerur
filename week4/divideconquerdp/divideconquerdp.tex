@@ -1,0 +1,252 @@
+\documentclass{beamer}
+\usefonttheme[onlymath]{serif}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[english]{babel}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsthm}
+\usepackage{gensymb}
+\usepackage{parskip}
+\usepackage{mathtools}
+\usepackage{listings}
+\usepackage{hyperref}
+\usepackage{graphicx}
+\usepackage{color}
+\usepackage{enumerate}
+\usepackage{verbatim}
+\usepackage{minted}
+\usepackage{tikz}
+\usepackage{pgfplots}
+\parskip 0pt
+
+
+\DeclareMathOperator{\lcm}{lcm}
+\newcommand\floor[1]{\left\lfloor#1\right\rfloor}
+\newcommand\ceil[1]{\left\lceil#1\right\rceil}
+\newcommand\abs[1]{\left|#1\right|}
+\newcommand\p[1]{\left(#1\right)}
+\newcommand\sqp[1]{\left[#1\right]}
+\newcommand\cp[1]{\left\{#1\right\}}
+\newcommand\norm[1]{\left\lVert#1\right\rVert}
+\renewcommand\Im{\operatorname{Im}}
+\renewcommand\Re{\operatorname{Re}}
+
+\usetheme{metropolis}
+\graphicspath{{../../shared/}}
+
+\tikzset{
+    invisible/.style={opacity=0},
+    visible on/.style={alt={#1{}{invisible}}},
+    alt/.code args={<#1>#2#3}{%
+      \alt<#1>{\pgfkeysalso{#2}}{\pgfkeysalso{#3}} % \pgfkeysalso doesn't change the path
+    },
+  }
+
+\title{Divide and Conquer Optimization}
+\author{Arnar Bjarni Arnarson}
+\institute{\href{http://ru.is/td}{School of Computer Science} \\[2pt] \href{http://ru.is}{Reykjavík University}}
+\titlegraphic{\hfill\includegraphics[height=0.6cm]{../shared/kattis}}
+\date{\textbf{Árangursrík forritun og lausn verkefna}}
+
+\begin{document}
+
+\begin{frame}[plain]
+    \titlepage
+\end{frame}
+
+\section*{Divide and Conquer Optimization}
+
+\begin{frame}[plain]{Preface}
+    \begin{itemize}
+        \item<1-> The problem used here as an example requires that you know Prefix Sums as an orthogonal part of the problem.
+        \item<2-> The idea is to compute all prefix sums of the array.
+        \item<3-> Suppose you have an array of integers $A_0, A_1, \dotsc, A_{N-1}$.
+        \item<4-> Let $S(i, j) = A_i + A_{i+1} + ... + A_{j-1} + A_{j}$.
+        \item<5-> Compute and store all values of $S(0, j)$ for all $j$ such that $0 \leq j < N$.
+        \item<6-> Now you can compute $S(i, j) = S(0, j) - S(0, i-1)$ in constant time for any $i$ and $j$.
+    \end{itemize}
+\end{frame}
+
+\begin{frame}[plain]{Guards}
+    \begin{itemize}
+        \item<1-> There are $1 \leq N \leq 8000$ prisoners, each in their own cell, and $1 \leq G \leq 3000$ guards.
+        \item<2-> Each prisoner $i$ has an intelligence $1 \leq S_i \leq 10^9$.
+        \item<3-> Each jail cell is assigned to exactly one guard.
+        \item<4-> Each guard can only watch over a contiguous range of prisoners.
+        \item<5-> If the guard watching prisoner $i$ is watching over $k$ cells, then the prisoner's escaping potential is $kS_i$.
+        \item<6-> Your goal is to assign the cells to guards in a way that minimizes the total escaping potential over all prisoners.
+    \end{itemize}
+\end{frame}
+
+\begin{frame}[plain]{Constructing a solution}
+    \begin{itemize}
+        \item<1-> Let $\mathrm{dp}(j, k)$ denote the optimal answer up to the $j$th prisoner with $k$ guards.
+        \item<2-> Let $C(i, j) = (j-i+1) \cdot \sum_{k=i}^{j} S_k$.
+        \item<3-> Then we have $\mathrm{dp}(i, 1) = C(0, i)$ as a base case.
+        \item<4-> When assigning a new guard, lets fix the end index of the segment. We must then find the optimal starting index.
+        \item<5-> We try all start indices
+            \[
+                \mathrm{dp}(j, k) = \min_{0 \leq i < j}\left( \mathrm{dp}(i, k-1) + C(i + 1, j) \right)
+            \]
+        \item<6-> Our state space is $\mathcal{O}(NG)$ and each state can be computed in $\mathcal{O}(N)$ time.
+        \item<7-> Time complexity is $\mathcal{O}(N^2G)$, which is too slow.
+    \end{itemize}
+\end{frame}
+
+\begin{frame}[plain,fragile]{Implementation - Initial Definitions}
+    \begin{scriptsize}
+        \begin{minted}{cpp}           
+#include <bits/stdc++.h>
+using namespace std;
+typedef long long ll;
+const ll INF = 80'000'000'000'000'000LL;
+
+ll arr[8000];
+ll prefix_sum[8001];
+ll mem[3001][8001];
+ll range_sum(int left, int right) {
+    return prefix_sum[right] - prefix_sum[left-1];
+}
+
+ll cost(ll left, ll right) {
+    return range_sum(left, right) * (right - left + 1LL);
+}
+        \end{minted}
+    \end{scriptsize}
+\end{frame}
+
+\begin{frame}[plain,fragile]{Naive Implementation - Computing Each Layer}
+    \begin{scriptsize}
+        \begin{minted}{cpp}           
+void compute(int level, int n) {
+    for (int end = 0; end < n; end++) {
+        ll tmp = INF;
+        for (int start = 0; start <= end; start++) {
+            tmp = min(tmp,
+                      (start ? mem[level - 1][start - 1] : 0)
+                      + cost(start, end));
+        }
+        mem[level][end] = tmp;
+    }
+}
+        \end{minted}
+    \end{scriptsize}
+\end{frame}
+
+\begin{frame}[plain,fragile]{Naive Implementation - Main}
+    \begin{scriptsize}
+        \begin{minted}{cpp}           
+int main()
+{
+    int n, g;
+    cin >> n >> g;
+    prefix_sum[0] = 0;
+    for (int i = 0; i < n; i++) {
+        cin >> arr[i];
+        prefix_sum[i+1] = prefix_sum[i] + arr[i];
+    }
+    for (int i = 0; i < n; i++) {
+        mem[0][i] = cost(0, i);
+    }
+    for (int guards = 2; guards <= g; guards++) {
+        compute(guards - 1, n);
+    }
+    cout << mem[g - 1][n - 1] << endl;
+    return 0;
+}
+        \end{minted}
+    \end{scriptsize}
+\end{frame}
+
+\begin{frame}[plain]{Optimizing}
+    \begin{itemize}
+        \item<1-> Let $\mathrm{opt}(j, k)$ be the optimal splitting point, or the value of $i$ which minimizes the previous expression.
+        \item<2-> We note that $\mathrm{opt}(j-1, k) \leq \mathrm{opt}(j, k) \leq \mathrm{opt}(j+1, k)$.
+        \item<3-> This allows us to divide and conquer.
+        \item<4-> First compute $\mathrm{dp}(N/2, k)$ and note the value of $\mathrm{opt}(N/2, k)$.
+        \item<5-> With that value in mind, compute $\mathrm{dp}(N/4, k)$ and $\mathrm{dp}(3N/4, k)$.
+        \item<6-> Repeat this process, computing the left and right side, tracking the minimum and maximum possible value of $\mathrm{opt}(j, k)$.
+    \end{itemize}
+\end{frame}
+
+\begin{frame}[plain]{Analyzing the complexity}
+    \begin{itemize}
+        \item<1-> Let $l$ and $r$ be the values we're tracking such that $l \le \mathrm{opt}(j, k) \le r$.
+        \item<2-> At each step we iterate from $l$ to $r$. Doesn't look like we've made improvements...
+        \item<3-> Note the level of the recursion, so level $1$ is where we compute $j=N/2$, level $2$ is where we compute $j=N/4$ and $j=3N/4$, and so on.
+        \item<4-> There are at most $\mathcal{O}(\log N)$ levels.
+        \item<5-> At each level we will do $\mathcal{O}(N)$ work, since there is no overlap for values of $j$ at the same level.
+        \item<6-> Note it does not matter how balanced $\mathrm{opt}(j, k)$ is, we always do linear work at a level.
+        \item<7-> Time complexity is now $\mathcal{O}(NG \log N)$, so fast enough.
+    \end{itemize}
+\end{frame}
+
+\begin{frame}[plain,fragile]{Optimized Implementation - Computing Each Layer}
+    \begin{scriptsize}
+        \begin{minted}{cpp}           
+void compute(int level, int l, int r, int optl, int optr) {
+    if (l > r) return;
+    int mid = (l+r)/2;
+    pair<ll, int> best = {INF, -1};
+    for (int k = optl; k <= min(mid, optr); k++) {
+        best = min(best,
+            {(k ? mem[level - 1][k - 1] : 0LL) + cost(k, mid), k});
+    }
+    mem[level][mid] = best.first;
+    int opt = best.second;
+    compute(level, l, mid-1, optl, opt);
+    compute(level, mid+1, r, opt, optr);
+}
+        \end{minted}
+    \end{scriptsize}
+\end{frame}
+
+\begin{frame}[plain,fragile]{Optimized Implementation - Main}
+    \begin{scriptsize}
+        \begin{minted}{cpp}           
+int main()
+{
+    int n, g;
+    cin >> n >> g;
+    prefix_sum[0] = 0;
+    for (int i = 0; i < n; i++) {
+        cin >> arr[i];
+        prefix_sum[i+1] = prefix_sum[i] + arr[i];
+    }
+    for (int i = 0; i < n; i++) {
+        mem[0][i] = cost(0, i);
+    }
+    for (int guards = 2; guards <= g; guards++) {
+        compute(guards-1, 0, n-1, 0, n-1);
+    }
+    cout << mem[g-1][n-1] << endl;
+    return 0;
+}
+        \end{minted}
+    \end{scriptsize}
+\end{frame}
+
+\begin{frame}[plain]{When can we use this?}
+    \begin{itemize}
+        \item<1-> When are the optimal splitting points are monotonic?
+        \item<2-> When the cost function $C$ satisfies the quadrangle inequality!
+        \item<3-> When $C(a, c) + C(b, d) \leq C(a, d) + C(b, c)$ for all $a < b < c < d$.
+        \item<4-> Intuitively, this means longer segments are worse than shorter segments.
+        \item<5-> It is usually not that difficult to prove the quadrangle inequality holds when it does.
+        \item<6-> Once you've proven it for a DP pattern like shown before, you know you can use this method.
+        \item<7-> The Convex Hull Trick can often be used in the same tasks to which this method applies.
+    \end{itemize}
+\end{frame}
+
+\begin{frame}[plain,fragile]{Try on these problems!}
+    \begin{itemize}
+        \item \href{https://codeforces.com/gym/103536/problem/A}{Guards}
+        \item \href{https://dmoj.ca/problem/apio14p2}{Split the Sequences} (Coming to Kattis soon!)
+        \item \href{https://codeforces.com/contest/1527/problem/E}{Partition Game}
+        \item \href{https://codeforces.com/problemset/problem/834/D}{The Bakery}
+    \end{itemize}
+\end{frame}
+
+\end{document}
+
