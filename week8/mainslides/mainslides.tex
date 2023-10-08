@@ -676,7 +676,7 @@ int mod_pow(int b, int e, int n) {
 
     \item Thus the algorithm is such that if it says $p$ is not prime, this is definitely true. If it says $p$ is a prime, it really means ``I couldn't exclude the possibility that $p$ is prime, but it could be non-prime''. 
 
-    \item If we test many $a$ the odds are in our favor. Thus we let the program take a variable \texttt{it} saying how often it should run. This runs in $\mathcal{O}(it\log(n)^3)$ for large $n$.
+    \item If we test many $a$ the odds are in our favor. Thus we let the program take a variable \texttt{t} saying how often it should run. This runs in $\mathcal{O}(t\log(n)^3)$ for large $n$.
 
 \end{itemize}
 
@@ -687,12 +687,12 @@ int mod_pow(int b, int e, int n) {
 
 \begin{small}
 \begin{minted}{cpp}
-bool isprobablyprime(ll n, int it) {
+bool is_probably_prime(ll n, int t) {
     if(n % 2 == 0) return n == 2;
     if(n <= 3) return n == 3;
     ll d = n - 1, r = 0;
     while(d % 2 == 0) d >>= 1, r++;
-    for(int i = 0; i < it; ++i) {
+    for(int i = 0; i < t; ++i) {
         ll a = (n - 3) * rand() / RAND_MAX + 2;
         ll x = modpow(a, d, n);
         if(x == 1 || x == n - 1) continue;
@@ -1073,31 +1073,28 @@ map<int, int> factor(int N) {
 
 \begin{tiny}
 \begin{minted}{cpp}
-#include<bits/stdc++.h>
+#include <bits/stdc++.h>
 using namespace std;
-typedef pair<int,int> ii;
-
-ii floyd(int (*f)(int), int x0) {
-    int t = (*f)(x0), h = (*f)((*f)(x0));
+pair<int, int> floyd(function<int(int)> f, int x0) {
+    int t = f(x0), h = f(f(x0));
     while(t != h) {
-        t = (*f)(t); 
-        h = (*f)((*f)(h));
+        t = f(t);
+        h = f(f(h));
     }
     int mu = 0; t = x0;
     while(t != h) {
-        t = (*f)(t);
-        h = (*f)(h);
+        t = f(t);
+        h = f(h);
         mu++;
     }
-    int lam = 1; h = (*f)(t);
+    int lam = 1; h = f(t);
     while(t != h) {
-        h = (*f)(h);
+        h = f(h);
         lam++;
     }
     // cycle length, starting point of cycle
-    return ii(lam, mu);
+    return {lam, mu};
 }
-
 \end{minted}
 \end{tiny}
 
