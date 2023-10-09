@@ -328,6 +328,13 @@ vector<int> toBase(int base, int val) {
   \end{itemize}
 \end{frame}
 
+\begin{frame}[plain]{Definitions that everybody should know}
+  \vspace{15pt}
+  \begin{itemize}
+    \item Every positive integer $n$ can be factored as a product of primes
+  \end{itemize}
+\end{frame}
+
 \begin{frame}[plain]{Primality checking}
   \vspace{20pt}
   \begin{itemize}
@@ -349,49 +356,14 @@ vector<int> toBase(int base, int val) {
 
 \begin{frame}[plain,fragile]{$\mathcal{O}(\sqrt{n})$ check}
 \begin{minted}{cpp}
-bool is_prime(int x) {
+bool is_prime(ll x) {
     if(x <= 1) return 0;
-    for(int i = 2; i * i <= x; ++i)
+    for(ll i = 2; i * i <= x; ++i)
         if(x % i == 0)
             return false;
     return true;
 }
 \end{minted}
-
-\begin{itemize}
-\item<2-> We will also see a faster (ish) way later on.
-\end{itemize}
-
-\end{frame}
-
-\begin{frame}[plain]{GCD}
-  \vspace{15pt}
-  \begin{itemize}
-    \item But how do you calculate GCD?
-    
-    \item<2-> Say we're considering two numbers $a \geq b$ with a greatest common divisor $g$. Then $g$ must also divide $a - b$ since it divides both $a, b$. Say there exists some $g' > g$ that divides $b$ and $a - b$. Then $g'$ also divides $a - b + b = a$, which contradicts the fact that $g$ is the greatest common divisor of $a$ and $b$.
-    
-    \item<3-> What does this all say? Well it means $\gcd(a, b) = \gcd(b, a - b)$. Repeating this logic it gives $\gcd(a, b) = \gcd(b, a \% b)$.
-  \end{itemize}
-\end{frame}
-
-
-\begin{frame}[plain,fragile]{Euclidean algorithm}
-  \vspace{20pt}
-  \begin{itemize}
-    \item This gives us the Euclidean algorithm which a recursive algorithm that computes the GCD of two numbers.
-      \begin{minted}{cpp}
-int gcd(int a, int b){
-    return b == 0 ? a : gcd(b, a % b);
-}
-    \end{minted}
-    \item Runs in $O(\log N)$ (proof left as exercise).
-    \onslide<2->
-    \item Notice that this can also compute LCM
-      \[
-        \text{lcm}(a, b) = \frac{a\cdot b}{\gcd(a,b)}
-      \]
-  \end{itemize}
 \end{frame}
 
 \section*{Modular arithmetic}
@@ -411,14 +383,14 @@ int gcd(int a, int b){
   \onslide<3->
     \item But what does this mean? Taking an integer modulo $n$ means taking the remainder of it when we divide by $n$.
   \onslide<4->
-    \item Thus if we do everything modulo $n$ we consider every number a multiple of $n$ apart the same. So modulo $7$ the numbers $1, 8, -6, 14, -13, \dots$ are all the same, and so are $5, -2, 12, -9, 19, \dots$.
+    \item Thus if we do everything modulo $n$ we consider every number a multiple of $n$ apart the same. So modulo $7$ the numbers $1, 8, -6, 15, -13, \dots$ are all the same, and so are $5, -2, 12, -9, 19, \dots$.
   \end{itemize}
 \end{frame}
 
 \begin{frame}[plain,fragile]
   \frametitle{Modulo}
   \begin{itemize}
-  \item In this system it's simplest if we pick one of the infinite set of equivalent numbers to be the one we use to represent them. We usually choose the representatives $0, 1, \dots, n - 1$ if we're working modulo $n$. The most common example people use is to say this is like using $0, 1, \dots, 23$ for the hours on a digital clock.
+  \item In this system it's simplest if we pick one of the infinite set of equivalent numbers to be the one we use to represent them. We usually choose the representatives $0, 1, \dots, n - 1$ if we're working modulo $n$.
   \item<2-> Then to do addition, subtraction and multiplication we just do it as usual, but add or subtract multiples of $n$ afterwards so we end up back in $\{0, 1, \dots, n - 1\}$.
   \item<3-> This means this set, which we denote $\mathbb{Z}_n$, is a ring, for those familiar with that terminology.
   \end{itemize}
@@ -438,7 +410,6 @@ int gcd(int a, int b){
     \item This implies that we can do all the computation in $\mathbb{Z}_n$.
   \onslide<3->
     \item This is often very useful, since the numbers never get too big and we don't generally have to worry about over/underflow.
-    \item<4-> We just do the calculations normally and then do \texttt{x\%n}. If we had a negative number we might have to do \texttt{(x\%n+n)\%n}.
   \end{itemize}
 \end{frame}
 
@@ -460,7 +431,24 @@ int gcd(int a, int b){
   \end{itemize}
 \end{frame}
 
-
+\begin{frame}[plain,fragile]{Euclidean algorithm}
+  \vspace{20pt}
+  \begin{itemize}
+    \item The Euclidean algorithm is a recursive algorithm that computes the GCD of two numbers.
+      \begin{minted}{cpp}
+int gcd(int a, int b){
+    return b == 0 ? a : gcd(b, a % b);
+}
+    \end{minted}
+    \item Runs in $O(\log N)$.
+    \onslide<2->
+    \item Notice that this can also compute LCM
+      \[
+        \text{lcm}(a, b) = \frac{a\cdot b}{\gcd(a,b)}
+      \]
+    \item See Wikipedia to see how it works and for proofs.
+  \end{itemize}
+\end{frame}
 
 \begin{frame}[plain]{Extended Euclidean algorithm}
   \vspace{20pt}
@@ -495,12 +483,13 @@ int egcd(int a, int b, int& x, int& y) {
 \end{frame}
 
 \begin{frame}[plain]{Applications}
-  \vspace{30pt}
+  \vspace{40pt}
   \begin{itemize}
     \item Essential step in the RSA algorithm.
     \item Essential step in many factorization algorithms.
     \item Can be generalized to other algebraic structures.
     \item Fundamental tool for proofs in number theory.
+    \item Many other algorithms for GCD
   \end{itemize}
 \end{frame}
 
@@ -511,11 +500,11 @@ int egcd(int a, int b, int& x, int& y) {
     \item Working modulo $n$ often requires division (multiplication by inverse).
     \onslide<2->
     \item Given some $a \pmod{n}$, then the multiplicative inverse $a^{-1}
-      \pmod{n}$ exists iff $a$ and $n$ are coprime (share no prime factors).
+      \pmod{n}$ exists iff. $a$ and $n$ are coprime.
     \onslide<3->
     \item It so happens that when we have from EGCD algorithm
       \[
-        1 = \gcd(a,n) = ax + ny \equiv ax \pmod{n}
+        ax + ny = \gcd(a,n) = 1
       \]
       then \[ a^{-1} \equiv x \pmod{n} \]
   \end{itemize}
@@ -526,30 +515,6 @@ int egcd(int a, int b, int& x, int& y) {
 int mod_inv(int a, int m) {
     int x, y, d = egcd(a, m, x, y);
     return d == 1 ? (x%m+m)%m : -1;
-}
-\end{minted}
-\end{frame}
-
-\begin{frame}[plain]{Exponentiation}
-  \vspace{20pt}
-  \begin{itemize}
-    \item Say we want to find $a^e \pmod{n}$. This should be no problem since the answer won't be too big.
-    
-    \item<2-> We use ideas from the divide and conquer week, calculating $a^{e/2}$ to take the calculation time down from $\mathcal{O}(e)$ to $\mathcal{O}(\log(e))$.
-  \end{itemize}
-\end{frame}
-
-\begin{frame}[plain, fragile]{Modular inverse}
-    \begin{minted}{cpp}
-int mod_pow(int b, int e, int n) {
-  int res = 1; 
-  while(e) {
-    if(e & 1) res = (res*a%n+n)%n;
-    a *= a; 
-    a %= n; 
-    e >>= 1; 
-  }
-  return res; 
 }
 \end{minted}
 \end{frame}
@@ -627,22 +592,13 @@ int mod_pow(int b, int e, int n) {
   \end{itemize}
 \end{frame}
 
-\begin{frame}[plain]{Chinese remainder theorem}
-  \vspace{10pt}
-  \begin{itemize}
-    \item We won't test the chinese remainder theorem, but it can be very useful to know.
-    
-    \item Sometimes just knowing a solution exists is enough. But this can also be coded, even when the moduli aren't pairwise coprime. It's just a hassle.
-  \end{itemize}
-\end{frame}
 
-\section*{Fancier factoring algorithms}
 
 \begin{frame}[plain]
-\frametitle{Faster prime check?}
+\frametitle{Faster?}
 
 \begin{itemize}
-    \item Can we check if a number is prime faster than $\mathcal{O}(\sqrt{n})$?
+    \item Can we do this faster?
     \item Sort of.
     \item We can use probabilistic prime testing, a function that says the input is \textit{probably} prime.
     \item This may sound shaky, but this program can be run a dozen times and at that point the probability of the program being wrong every
@@ -676,7 +632,7 @@ int mod_pow(int b, int e, int n) {
 
     \item Thus the algorithm is such that if it says $p$ is not prime, this is definitely true. If it says $p$ is a prime, it really means ``I couldn't exclude the possibility that $p$ is prime, but it could be non-prime''. 
 
-    \item If we test many $a$ the odds are in our favor. Thus we let the program take a variable \texttt{t} saying how often it should run. This runs in $\mathcal{O}(t\log(n)^3)$ for large $n$.
+    \item If we test many $a$ the odds are in our favor. Thus we let the program take a variable \texttt{it} saying how often it should run. This runs in $\mathcal{O}(it\log(n)^3)$ for large $n$.
 
 \end{itemize}
 
@@ -687,12 +643,12 @@ int mod_pow(int b, int e, int n) {
 
 \begin{small}
 \begin{minted}{cpp}
-bool is_probably_prime(ll n, int t) {
+bool isprobablyprime(ll n, int it) {
     if(n % 2 == 0) return n == 2;
     if(n <= 3) return n == 3;
     ll d = n - 1, r = 0;
     while(d % 2 == 0) d >>= 1, r++;
-    for(int i = 0; i < t; ++i) {
+    for(int i = 0; i < it; ++i) {
         ll a = (n - 3) * rand() / RAND_MAX + 2;
         ll x = modpow(a, d, n);
         if(x == 1 || x == n - 1) continue;
@@ -711,9 +667,9 @@ bool is_probably_prime(ll n, int t) {
 
 \begin{frame}[plain,fragile]{Bulk discount}
   \begin{itemize}
-    \item One way to get primes "faster" is getting a bulk discount. 
+    \item If we want to generate primes, using a primality test is very inefficient.
     \onslide<2->
-    \item If we want to get a lot of them, we can use the sieve of Eratosthenes.
+    \item Instead, our preferred method of prime generation is the sieve of Eratosthenes.
       \begin{itemize}
         \onslide<3->
         \item For all numbers from $2$ to $\sqrt{n}$:
@@ -977,35 +933,22 @@ vector<int> eratosthenes(int n){
     \end{minted}
 \end{frame}
 
+
 \begin{frame}[plain]{Factoring}
+  \vspace{10pt}
+  The fundamental theorem of arithmetic states that
   \begin{itemize}
-    \item What if we don't just want to check if a number is prime but to get its prime factorization?
-    
-    \item<2-> Well there is a straight forward way to do it in $\mathcal{O}(\sqrt{n})$ like before.
+    \item Every integer greater than $1$ is a unique product of primes.
+    \onslide<2->
+    \[
+      n = p_1^{e_1}p_2^{e_2}p_3^{e_3}\cdots p_k^{e_k}
+    \]
   \end{itemize}
-\end{frame}
-
-\begin{frame}[plain,fragile]{$\mathcal{O}(\sqrt{n})$ check}
-\begin{minted}{cpp}
-map<int,int> factor(int x) {
-    map<int, int> primes;
-    for(int i = 2; i * i <= x; ++i)
-        if(x % i == 0) {
-            primes[i] = 0;
-            while(x % i == 0) {
-                primes[i]++;
-                x /= i;
-            }
-        }
-    }
-    if(x != 1) primes[x] = 1;
-    return primes;
-}
-\end{minted}
-\end{frame}
-
-\begin{frame}[plain]{Factoring}
-  But we can also use the same bulk discount idea as before.
+  \onslide<3->
+  We can therefore store integers as lists of their prime powers. \\
+  \vspace{10pt}
+  \onslide<4->
+  To factor an integer $n$:
   \begin{itemize}
     \item Use the sieve of Eratosthenes to generate all the primes up
       $\sqrt{n}$
@@ -1073,28 +1016,31 @@ map<int, int> factor(int N) {
 
 \begin{tiny}
 \begin{minted}{cpp}
-#include <bits/stdc++.h>
+#include<bits/stdc++.h>
 using namespace std;
-pair<int, int> floyd(function<int(int)> f, int x0) {
-    int t = f(x0), h = f(f(x0));
+typedef pair<int,int> ii;
+
+ii floyd(int (*f)(int), int x0) {
+    int t = (*f)(x0), h = (*f)((*f)(x0));
     while(t != h) {
-        t = f(t);
-        h = f(f(h));
+        t = (*f)(t); 
+        h = (*f)((*f)(h));
     }
     int mu = 0; t = x0;
     while(t != h) {
-        t = f(t);
-        h = f(h);
+        t = (*f)(t);
+        h = (*f)(h);
         mu++;
     }
-    int lam = 1; h = f(t);
+    int lam = 1; h = (*f)(t);
     while(t != h) {
-        h = f(h);
+        h = (*f)(h);
         lam++;
     }
     // cycle length, starting point of cycle
-    return {lam, mu};
+    return ii(lam, mu);
 }
+
 \end{minted}
 \end{tiny}
 
@@ -1107,7 +1053,7 @@ pair<int, int> floyd(function<int(int)> f, int x0) {
 
 \item The idea is now to let $g(x) = x^2 + 1 \ (mod \ n)$ and create the sequence $x, g(x), g(g(x)), \dots$ where $x$ is chosen randomly. Denote these numbers $x_1, x_2, \dots$. We calculate these values and check if $\operatorname{gcd}(x_i - x_j, n) > 1$. Then the sequence has begun repeating not just modulo $n$ but modulo $d$ where $d$ divides $n$.
 
-\item Ef $\operatorname{gcd}(x_i - x_j, n) = 1$ for all values then either $n$ is prime or we just didn't manage to find a divisor. Thus we generally test a few starting values of $x$ before giving up. This is usually only useful for quite big numbers since it doesn't pay off until $x > 2^{32}$ at least.
+\item If $\operatorname{gcd}(x_i - x_j, n) = 1$ for all values then either $n$ is not prime or we just didn't manage to find a divisor. Thus we generally test a few starting values of $x$ before giving up. This is usually only useful for quite big numbers since it doesn't pay off until $x > 2^{32}$ at least.
 
 \item The time complexity is an open question, but it's conjectured to be the square root of the largest factor of $N$. It is thus quite slow for primes, but much faster for composite numbers. Checking for primality first using Miller-Rabin can be useful.
 
@@ -1138,11 +1084,9 @@ ll rho(ll n) {
 
 \end{frame}
 
-\section*{Number theory functions:}
-
 \begin{frame}[plain]{Number theory functions}
   \vspace{20pt}
-  The prime factors can be quite useful to calculate many other things.
+  The prime factors can be quite useful.
   \[
     n = p_1^{e_1}p_2^{e_2}\cdots p_k^{e_k}
   \]
